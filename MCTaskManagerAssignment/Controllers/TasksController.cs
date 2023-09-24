@@ -54,6 +54,14 @@ public class TasksController : ControllerBase
         return Ok(new UpsertTaskResponse(taskId));
     }
 
+    [HttpPost("{taskId}/root")]
+    public async Task<IActionResult> ChangeTaskRootAsync([FromRoute] string taskId, [FromBody] TaskRootData newRoot, CancellationToken cancellationToken)
+    {
+        await _taskService.UpdateTaskRootAsync(taskId, newRoot.RootId, cancellationToken);
+
+        return NoContent();
+    }
+
     [HttpDelete("{taskId}")]
     public async Task<IActionResult> DeleteTaskAsync([FromRoute] string taskId, CancellationToken cancellationToken)
     {
