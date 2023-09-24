@@ -26,7 +26,7 @@ public class TaskService : ITaskService
         var task = taskDocument.ToFullView(childTaskDocuments.Select(x => new TaskViewBase
         {
             Id = x.Id,
-            ParentId = x.ParentId,
+            RootId = x.RootId,
             Summary = x.Summary,
             Priority = x.Priority,
             Status = x.Status
@@ -48,7 +48,7 @@ public class TaskService : ITaskService
         var document = new TaskDocument
         {
             Id = taskDetails.Id ?? Guid.NewGuid().ToString(),
-            ParentId = taskDetails.ParentId,
+            RootId = taskDetails.ParentId,
             Summary = taskDetails.Summary,
             Description = taskDetails.Description,
             CreateDate = DateTime.UtcNow,
@@ -62,11 +62,19 @@ public class TaskService : ITaskService
         return document.Id;
     }
 
-    public async Task UpdateTaskParentAsync(string taskId, string newParentId, CancellationToken cancellationToken)
+    public async Task UpdateTaskRootAsync(string taskId, string newRootId, CancellationToken cancellationToken)
     {
         var document = await _taskRepository.GetTaskAsync(taskId, cancellationToken);
-        document.ParentId = newParentId;
+        document.RootId = newRootId;
 
         await _taskRepository.UpsertTaskAsync(document, cancellationToken);
+    }
+
+    public async Task<IEnumerable<TaskSearchView>> SearchTasksAsync(string keyPhrase, string[] searchBy, int take, int skip, CancellationToken cancellationToken)
+    {
+        var documents = await _taskRepository.SearchTasksAsync(keyPhrase, searchBy, take, skip, cancellationToken);
+        var searchResult = documents.Select(x => new TaskSearchView(x.Id, x.RootId, x.Summary, x.Description));
+
+        return searchResult;
     }
 }

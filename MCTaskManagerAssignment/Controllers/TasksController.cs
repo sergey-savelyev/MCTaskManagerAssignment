@@ -24,12 +24,26 @@ public class TasksController : ControllerBase
         return Ok(task);
     }
 
+    [HttpGet("search")]
+    public async Task<IActionResult> SearchTasksAsync([FromQuery] string searchPhrase, [FromQuery] int take,
+                                                      [FromQuery] int skip, CancellationToken cancellationToken)
+    {
+        var result = await _taskService.SearchTasksAsync(searchPhrase,
+                                                         new[] { TaskCriteria.Summary, TaskCriteria.Description }, take,
+                                                         skip, cancellationToken);
+
+        return Ok(result.ToList());
+    }
+
     [HttpGet]
-    public async Task<IActionResult> GetTaskBatchAsync([FromQuery] int skip, [FromQuery] int take, CancellationToken cancellationToken, [FromQuery] string sortBy = TaskSortFields.CreateDate, [FromQuery] bool descendingSort = false)
+    public async Task<IActionResult> GetTaskBatchAsync([FromQuery] int skip, [FromQuery] int take,
+                                                       CancellationToken cancellationToken,
+                                                       [FromQuery] string sortBy = TaskCriteria.CreateDate,
+                                                       [FromQuery] bool descendingSort = false)
     {
         var tasks = await _taskService.GetTaskBatchAsync(take, skip, sortBy, descendingSort, cancellationToken);
         
-        return Ok(tasks);
+        return Ok(tasks.ToList());
     }
 
     [HttpPost]

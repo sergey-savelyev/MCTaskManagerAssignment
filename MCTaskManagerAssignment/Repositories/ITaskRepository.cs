@@ -13,4 +13,6 @@ public interface ITaskRepository
     Task<TaskDocument> UpsertTaskAsync(TaskDocument task, CancellationToken cancellationToken);
 
     Task<bool> DeleteTaskAsync(string id, CancellationToken cancellationToken);
+
+    Task<IEnumerable<TaskSearchDocument>> SearchTasksAsync(string keyPhrase, string[] searchBy, int take, int skip, CancellationToken cancellationToken);
 }

@@ -6,7 +6,7 @@ public record TaskDocument
 {
     public string Id { get; set; } = default!;
 
-    public string? ParentId { get; set; }
+    public string? RootId { get; set; }
 
     public string? Summary { get; set; }
 
@@ -23,7 +23,7 @@ public record TaskDocument
     public TaskViewDetailed ToDetailedView() => new TaskViewDetailed
     {
         Id = Id,
-        ParentId = ParentId,
+        RootId = RootId,
         Summary = Summary,
         Priority = Priority,
         Status = Status,
@@ -34,7 +34,7 @@ public record TaskDocument
     public TaskViewFull ToFullView(IEnumerable<TaskViewBase> subtasks) => new TaskViewFull
     {
         Id = Id,
-        ParentId = ParentId,
+        RootId = RootId,
         Summary = Summary,
         Priority = Priority,
         Status = Status,
@@ -44,3 +44,5 @@ public record TaskDocument
         Subtasks = subtasks.ToList()
     };
 }
+
+public record TaskSearchDocument(string Id, string? RootId, string? Summary, string? Description);

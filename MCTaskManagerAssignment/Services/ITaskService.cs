@@ -10,7 +10,9 @@ public interface ITaskService
 
     Task<string> CreateOrUpdateTaskAsync(UpsertTaskData taskDetails, CancellationToken cancellationToken);
 
-    Task UpdateTaskParentAsync(string taskId, string newParentId, CancellationToken cancellationToken);
+    Task UpdateTaskRootAsync(string taskId, string newRootId, CancellationToken cancellationToken);
 
     Task DeleteTaskAsync(string taskId, CancellationToken cancellationToken);
+
+    Task<IEnumerable<TaskSearchView>> SearchTasksAsync(string keyPhrase, string[] searchBy, int take, int skip, CancellationToken cancellationToken);
 }

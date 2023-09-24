@@ -4,7 +4,7 @@ public record TaskViewBase
 {
     public string Id { get; set; } = default!;
 
-    public string? ParentId { get; set; }
+    public string? RootId { get; set; }
 
     public string? Summary { get; set; }
 
@@ -26,3 +26,5 @@ public record TaskViewFull : TaskViewDetailed
 
     public string? Description { get; set; }
 }
+
+public record TaskSearchView(string Id, string? RootId, string? Summary, string? Description);
