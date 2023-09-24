@@ -21,7 +21,7 @@ public class TaskService : ITaskService
     public async Task<TaskViewFull> GetTaskAsync(string taskId, CancellationToken cancellationToken)
     {
         var taskDocument = await _taskRepository.GetTaskAsync(taskId, cancellationToken);
-        var childTaskDocuments = await _taskRepository.GetChildTasksAsync(taskId, cancellationToken);
+        var childTaskDocuments = await _taskRepository.GetSubtasksAsync(taskId, cancellationToken);
 
         var task = taskDocument.ToFullView(childTaskDocuments.Select(x => new TaskViewBase
         {

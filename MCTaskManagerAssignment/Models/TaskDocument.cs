@@ -31,7 +31,7 @@ public record TaskDocument
         DueDate = DueDate
     };
 
-    public TaskViewFull ToFullView(IEnumerable<TaskViewBase> childTasks) => new TaskViewFull
+    public TaskViewFull ToFullView(IEnumerable<TaskViewBase> subtasks) => new TaskViewFull
     {
         Id = Id,
         ParentId = ParentId,
@@ -41,6 +41,6 @@ public record TaskDocument
         Description = Description,
         CreateDate = CreateDate,
         DueDate = DueDate,
-        ChildTasks = childTasks.ToList()
+        Subtasks = subtasks.ToList()
     };
 }

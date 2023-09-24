@@ -8,7 +8,7 @@ public interface ITaskRepository
 
     Task<IEnumerable<TaskDocument>> GetTaskBatchAsync(int take, int skip, string sortBy, bool descending, CancellationToken cancellationToken);
 
-    Task<IEnumerable<TaskDocument>> GetChildTasksAsync(string parentId, CancellationToken cancellationToken);
+    Task<IEnumerable<TaskDocument>> GetSubtasksAsync(string parentId, CancellationToken cancellationToken);
 
     Task<TaskDocument> UpsertTaskAsync(TaskDocument task, CancellationToken cancellationToken);
 

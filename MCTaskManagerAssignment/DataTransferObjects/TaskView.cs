@@ -22,7 +22,7 @@ public record TaskViewDetailed : TaskViewBase
 
 public record TaskViewFull : TaskViewDetailed
 {
-    public List<TaskViewBase> ChildTasks { get; set; } = new();
+    public List<TaskViewBase> Subtasks { get; set; } = new();
 
     public string? Description { get; set; }
 }
