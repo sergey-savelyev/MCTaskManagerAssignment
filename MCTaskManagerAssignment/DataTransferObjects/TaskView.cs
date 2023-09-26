@@ -1,30 +1,34 @@
+using System.Text.Json.Serialization;
+
 namespace MCTaskManagerAssignment.DataTransferObjects;
 
 public record TaskViewBase
 {
-    public string Id { get; set; } = default!;
+    public required string Id { get; init; }
 
-    public string? RootId { get; set; }
+    public required string Summary { get; init; }
 
-    public string? Summary { get; set; }
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    public TaskPriority Priority { get; init; }
 
-    public TaskPriority Priority { get; set; }
-
-    public TaskStatus Status { get; set; }
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    public TaskStatus Status { get; init; }
 }
 
 public record TaskViewDetailed : TaskViewBase
 {
-    public DateTime CreateDate { get; set; }
+    public string? RootId { get; init; }
 
-    public DateTime DueDate { get; set; }
+    public DateTime CreateDate { get; init; }
+
+    public DateTime DueDate { get; init; }
 }
 
 public record TaskViewFull : TaskViewDetailed
 {
-    public List<TaskViewBase> Subtasks { get; set; } = new();
+    public List<TaskViewBase> Subtasks { get; init; } = new();
 
-    public string? Description { get; set; }
+    public string? Description { get; init; }
 }
 
-public record TaskSearchView(string Id, string? RootId, string? Summary, string? Description);
+public record TaskSearchView(string Id, string? Summary, string? Description);

@@ -1,3 +1,3 @@
 namespace MCTaskManagerAssignment.DataTransferObjects;
 
-public record TaskRootData(string RootId);
+public record TaskRootData(string? RootId);

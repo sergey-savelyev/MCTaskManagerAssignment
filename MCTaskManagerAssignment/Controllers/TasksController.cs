@@ -1,5 +1,5 @@
 using MCTaskManagerAssignment.DataTransferObjects;
-using MCTaskManagerAssignment.Models;
+using MCTaskManagerAssignment.Exceptions;
 using MCTaskManagerAssignment.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -19,29 +19,34 @@ public class TasksController : ControllerBase
     [HttpGet("{taskId}")]
     public async Task<IActionResult> GetTaskAsync([FromRoute] string taskId, CancellationToken cancellationToken)
     {
-        var task = await _taskService.GetTaskAsync(taskId, cancellationToken);
-        
-        return Ok(task);
+        try
+        {
+            var task = await _taskService.GetTaskAsync(taskId, cancellationToken);
+
+            return Ok(task);
+        }
+        catch (EntityNotFoundException ex)
+        {
+            return NotFound(ex.Message);
+        }
     }
 
-    [HttpGet("search")]
-    public async Task<IActionResult> SearchTasksAsync([FromQuery] string searchPhrase, [FromQuery] int take,
+    [HttpGet("search/{phrase}")]
+    public async Task<IActionResult> SearchTasksAsync([FromRoute] string phrase, [FromQuery] int take,
                                                       [FromQuery] int skip, CancellationToken cancellationToken)
     {
-        var result = await _taskService.SearchTasksAsync(searchPhrase,
-                                                         new[] { TaskCriteria.Summary, TaskCriteria.Description }, take,
-                                                         skip, cancellationToken);
+        var result = await _taskService.SearchTasksAsync(phrase, take, skip, cancellationToken);
 
         return Ok(result.ToList());
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetTaskBatchAsync([FromQuery] int skip, [FromQuery] int take,
+    public async Task<IActionResult> GetRootTaskBatchAsync([FromQuery] int skip, [FromQuery] int take,
                                                        CancellationToken cancellationToken,
-                                                       [FromQuery] string sortBy = TaskCriteria.CreateDate,
+                                                       [FromQuery] string sortBy = nameof(TaskViewFull.CreateDate),
                                                        [FromQuery] bool descendingSort = false)
     {
-        var tasks = await _taskService.GetTaskBatchAsync(take, skip, sortBy, descendingSort, cancellationToken);
+        var tasks = await _taskService.GetRootTaskBatchAsync(take, skip, sortBy, descendingSort, cancellationToken);
         
         return Ok(tasks.ToList());
     }
@@ -54,19 +59,33 @@ public class TasksController : ControllerBase
         return Ok(new UpsertTaskResponse(taskId));
     }
 
-    [HttpPost("{taskId}/root")]
+    [HttpPatch("{taskId}/root")]
     public async Task<IActionResult> ChangeTaskRootAsync([FromRoute] string taskId, [FromBody] TaskRootData newRoot, CancellationToken cancellationToken)
     {
-        await _taskService.UpdateTaskRootAsync(taskId, newRoot.RootId, cancellationToken);
+        try
+        {
+            await _taskService.UpdateTaskRootAsync(taskId, newRoot.RootId, cancellationToken);
 
-        return NoContent();
+            return NoContent();
+        }
+        catch (EntityNotFoundException ex)
+        {
+            return NotFound(ex.Message);
+        }
     }
 
     [HttpDelete("{taskId}")]
     public async Task<IActionResult> DeleteTaskAsync([FromRoute] string taskId, CancellationToken cancellationToken)
     {
-        await _taskService.DeleteTaskAsync(taskId, cancellationToken);
+        try
+        {
+            await _taskService.DeleteTaskAsync(taskId, cancellationToken);
 
-        return NoContent();
+            return NoContent();
+        }
+        catch (EntityNotFoundException ex)
+        {
+            return NotFound(ex.Message);
+        }
     }
 }

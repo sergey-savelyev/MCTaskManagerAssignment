@@ -4,15 +4,17 @@ namespace MCTaskManagerAssignment.Repositories;
 
 public interface ITaskRepository
 {
-    Task<TaskDocument> GetTaskAsync(string id, CancellationToken cancellationToken);
+    Task<TaskEntity> GetTaskAsync(string id, CancellationToken cancellationToken);
 
-    Task<IEnumerable<TaskDocument>> GetTaskBatchAsync(int take, int skip, string sortBy, bool descending, CancellationToken cancellationToken);
+    Task<IEnumerable<TaskEntity>> GetRootTaskBatchAsync(int take, int skip, string sortBy, bool descending, CancellationToken cancellationToken);
 
-    Task<IEnumerable<TaskDocument>> GetSubtasksAsync(string parentId, CancellationToken cancellationToken);
+    Task<IEnumerable<TaskEntity>> GetSubtasksAsync(string parentId, CancellationToken cancellationToken);
 
-    Task<TaskDocument> UpsertTaskAsync(TaskDocument task, CancellationToken cancellationToken);
+    Task<TaskEntity> UpdateTaskAsync(TaskEntity task, CancellationToken cancellationToken);
 
-    Task<bool> DeleteTaskAsync(string id, CancellationToken cancellationToken);
+    Task<TaskEntity> CreateTaskAsync(TaskEntity task, CancellationToken cancellationToken);
 
-    Task<IEnumerable<TaskSearchDocument>> SearchTasksAsync(string keyPhrase, string[] searchBy, int take, int skip, CancellationToken cancellationToken);
+    Task DeleteTaskAsync(string id, CancellationToken cancellationToken);
+
+    Task<IEnumerable<TaskEntity>> SearchTasksAsync(string keyPhrase, int take, int skip, CancellationToken cancellationToken);
 }
