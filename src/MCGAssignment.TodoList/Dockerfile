@@ -12,9 +12,9 @@ USER appuser
 FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:7.0 AS build
 ARG configuration=Release
 WORKDIR /src
-COPY ["MCGAssignment.TodoList/MCGAssignment.TodoList.csproj", "MCGAssignment.TodoList/"]
+COPY ["src/MCGAssignment.TodoList/MCGAssignment.TodoList.csproj", "MCGAssignment.TodoList/"]
 RUN dotnet restore "MCGAssignment.TodoList/MCGAssignment.TodoList.csproj"
-COPY . .
+COPY src .
 WORKDIR "/src/MCGAssignment.TodoList"
 RUN dotnet build "MCGAssignment.TodoList.csproj" -c $configuration -o /app/build
 
