@@ -3,10 +3,27 @@
 version: '3.4'
 
 services:
-  mctaskmanagerassignment:
+  db:
+    image: mysql:latest
+    restart: always
+    expose:
+      # Opens port 3308 on the container
+      - '3308'
+    volumes:
+      - ./docker-entrypoint-initdb.d/:/docker-entrypoint-initdb.d/
+    ports:
+      - "3308:3306"
+    command: ["mysqld", "--default-authentication-plugin=mysql_native_password"]
+  mcgassignmenttodolist:
+    depends_on:
+      - db
     image: mcgassignmenttodolist
     build:
       context: .
       dockerfile: MCGAssignment.TodoList/Dockerfile
     ports:
       - 5006:5006
+
+volumes:
+  db:
+    driver: local

@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace MCGAssignment.TodoList.Controllers;
 
-[Route("tasks")]
+[Route("api/tasks")]
 [ApiController]
 public class TasksController : ControllerBase
 {

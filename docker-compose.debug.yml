@@ -3,7 +3,7 @@
 version: '3.4'
 
 services:
-  mctaskmanagerassignment:
+  mcgassignmenttodolist:
     image: mcgassignmenttodolist
     build:
       context: .
