@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MCGAssignment.TodoList", "MCGAssignment.TodoList\MCGAssignment.TodoList.csproj", "{B545A807-1B76-4449-9FF7-B22B3299F804}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MCGAssignment.TodoList", "src/MCGAssignment.TodoList\MCGAssignment.TodoList.csproj", "{B545A807-1B76-4449-9FF7-B22B3299F804}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MCGAssignment.TodoList.Lib", "MCGAssignment.TodoList.Lib\MCGAssignment.TodoList.Lib.csproj", "{E24BE547-00B9-44CA-A8FF-37A267B5674F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MCGAssignment.TodoList.Lib", "src/MCGAssignment.TodoList.Lib\MCGAssignment.TodoList.Lib.csproj", "{E24BE547-00B9-44CA-A8FF-37A267B5674F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

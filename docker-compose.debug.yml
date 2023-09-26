@@ -7,7 +7,7 @@ services:
     image: mcgassignmenttodolist
     build:
       context: .
-      dockerfile: MCGAssignment.TodoList/Dockerfile
+      dockerfile: src/MCGAssignment.TodoList/Dockerfile
       args:
         - configuration=Debug
     ports:
