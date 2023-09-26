@@ -1,5 +1,5 @@
-using MCGAssignment.TodoList.DataTransferObjects;
 using MCGAssignment.TodoList.Exceptions;
+using MCGAssignment.TodoList.DataTransferObjects;
 using MCGAssignment.TodoList.Services;
 using Microsoft.AspNetCore.Mvc;
 
