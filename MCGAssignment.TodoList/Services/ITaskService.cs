@@ -1,6 +1,6 @@
-using MCTaskManagerAssignment.DataTransferObjects;
+using MCGAssignment.TodoList.DataTransferObjects;
 
-namespace MCTaskManagerAssignment.Services;
+namespace MCGAssignment.TodoList.Services;
 
 public interface ITaskService
 {

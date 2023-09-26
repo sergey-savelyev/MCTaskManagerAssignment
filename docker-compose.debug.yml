@@ -4,10 +4,10 @@ version: '3.4'
 
 services:
   mctaskmanagerassignment:
-    image: mctaskmanagerassignment
+    image: mcgassignmenttodolist
     build:
       context: .
-      dockerfile: MCTaskManagerAssignment/Dockerfile
+      dockerfile: MCGAssignment.TodoList/Dockerfile
       args:
         - configuration=Debug
     ports:

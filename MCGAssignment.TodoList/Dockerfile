@@ -12,17 +12,17 @@ USER appuser
 FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:7.0 AS build
 ARG configuration=Release
 WORKDIR /src
-COPY ["MCTaskManagerAssignment/MCTaskManagerAssignment.csproj", "MCTaskManagerAssignment/"]
-RUN dotnet restore "MCTaskManagerAssignment/MCTaskManagerAssignment.csproj"
+COPY ["MCGAssignment.TodoList/MCGAssignment.TodoList.csproj", "MCGAssignment.TodoList/"]
+RUN dotnet restore "MCGAssignment.TodoList/MCGAssignment.TodoList.csproj"
 COPY . .
-WORKDIR "/src/MCTaskManagerAssignment"
-RUN dotnet build "MCTaskManagerAssignment.csproj" -c $configuration -o /app/build
+WORKDIR "/src/MCGAssignment.TodoList"
+RUN dotnet build "MCGAssignment.TodoList.csproj" -c $configuration -o /app/build
 
 FROM build AS publish
 ARG configuration=Release
-RUN dotnet publish "MCTaskManagerAssignment.csproj" -c $configuration -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "MCGAssignment.TodoList.csproj" -c $configuration -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "MCTaskManagerAssignment.dll"]
+ENTRYPOINT ["dotnet", "MCGAssignment.TodoList.dll"]

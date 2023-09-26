@@ -1,9 +1,9 @@
-using MCTaskManagerAssignment.DataTransferObjects;
-using MCTaskManagerAssignment.Exceptions;
-using MCTaskManagerAssignment.Services;
+using MCGAssignment.TodoList.DataTransferObjects;
+using MCGAssignment.TodoList.Exceptions;
+using MCGAssignment.TodoList.Services;
 using Microsoft.AspNetCore.Mvc;
 
-namespace MCTaskManagerAssignment.Controllers;
+namespace MCGAssignment.TodoList.Controllers;
 
 [Route("tasks")]
 [ApiController]

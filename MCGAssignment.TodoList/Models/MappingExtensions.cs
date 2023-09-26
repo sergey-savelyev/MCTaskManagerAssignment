@@ -1,6 +1,6 @@
-using MCTaskManagerAssignment.DataTransferObjects;
+using MCGAssignment.TodoList.DataTransferObjects;
 
-namespace MCTaskManagerAssignment.Models;
+namespace MCGAssignment.TodoList.Models;
 
 public static class MappingExtensions
 {

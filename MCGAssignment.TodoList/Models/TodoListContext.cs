@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 
-namespace MCTaskManagerAssignment.Models;
+namespace MCGAssignment.TodoList.Models;
 
 public class TodoListContext : DbContext
 {

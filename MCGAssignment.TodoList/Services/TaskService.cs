@@ -1,9 +1,9 @@
-using MCTaskManagerAssignment.DataTransferObjects;
-using MCTaskManagerAssignment.Exceptions;
-using MCTaskManagerAssignment.Models;
-using MCTaskManagerAssignment.Repositories;
+using MCGAssignment.TodoList.DataTransferObjects;
+using MCGAssignment.TodoList.Exceptions;
+using MCGAssignment.TodoList.Models;
+using MCGAssignment.TodoList.Repositories;
 
-namespace MCTaskManagerAssignment.Services;
+namespace MCGAssignment.TodoList.Services;
 
 public class TaskService : ITaskService
 {

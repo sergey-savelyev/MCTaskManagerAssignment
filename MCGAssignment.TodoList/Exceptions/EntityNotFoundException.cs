@@ -1,4 +1,4 @@
-namespace MCTaskManagerAssignment.Exceptions;
+namespace MCGAssignment.TodoList.Exceptions;
 
 public class EntityNotFoundException : Exception
 {

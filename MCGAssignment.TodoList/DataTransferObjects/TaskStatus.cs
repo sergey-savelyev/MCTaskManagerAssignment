@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace MCTaskManagerAssignment.DataTransferObjects;
+namespace MCGAssignment.TodoList.DataTransferObjects;
 
 [JsonConverter(typeof(JsonStringEnumConverter))]
 public enum TaskStatus

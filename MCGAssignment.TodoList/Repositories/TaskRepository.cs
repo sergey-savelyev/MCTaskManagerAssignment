@@ -1,9 +1,9 @@
 using System.Linq.Expressions;
-using MCTaskManagerAssignment.Exceptions;
-using MCTaskManagerAssignment.Models;
+using MCGAssignment.TodoList.Exceptions;
+using MCGAssignment.TodoList.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace MCTaskManagerAssignment.Repositories;
+namespace MCGAssignment.TodoList.Repositories;
 
 public class TaskRepository : ITaskRepository
 {

@@ -1,6 +1,6 @@
-using MCTaskManagerAssignment.Models;
-using MCTaskManagerAssignment.Repositories;
-using MCTaskManagerAssignment.Services;
+using MCGAssignment.TodoList.Models;
+using MCGAssignment.TodoList.Repositories;
+using MCGAssignment.TodoList.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);

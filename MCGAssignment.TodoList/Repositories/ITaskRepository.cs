@@ -1,6 +1,6 @@
-using MCTaskManagerAssignment.Models;
+using MCGAssignment.TodoList.Models;
 
-namespace MCTaskManagerAssignment.Repositories;
+namespace MCGAssignment.TodoList.Repositories;
 
 public interface ITaskRepository
 {
