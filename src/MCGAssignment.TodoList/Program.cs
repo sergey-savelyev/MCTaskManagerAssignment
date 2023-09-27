@@ -3,14 +3,32 @@ using MCGAssignment.TodoList.Repositories;
 using MCGAssignment.TodoList.Services;
 using Microsoft.EntityFrameworkCore;
 
+const string AllowCorsPolicyName = "_allowCorsPolicy";
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(name: AllowCorsPolicyName, policy  =>
+    {
+        policy
+            .WithOrigins("http://localhost:3939")
+            .AllowAnyMethod()
+            .AllowAnyHeader()
+            .AllowCredentials();
+    });
+});
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddControllers();
 
 builder.Services.AddScoped<ITaskRepository, TaskRepository>();
+builder.Services.AddScoped<ILogRepository, LogRepository>();
+
 builder.Services.AddScoped<ITaskService, TaskService>();
+builder.Services.AddScoped<ITaskActionLogger, TaskActionLogger>();
+builder.Services.AddScoped<ITaskActionLogService, TaskActionLogService>();
+
 builder.Services.AddDbContext<TodoListContext>(options => 
 {
     options.UseLazyLoadingProxies().UseMySQL(builder.Configuration["ConnectionStrings:DefaultConnection"] ?? throw new Exception("Failed to initialize: connection string cannot be null"));
@@ -30,6 +48,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseCors(AllowCorsPolicyName);
 app.UseHttpsRedirection();
 app.MapControllers();
 

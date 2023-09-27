@@ -8,10 +8,12 @@ namespace MCGAssignment.TodoList.Services;
 public class TaskService : ITaskService
 {
     private readonly ITaskRepository _taskRepository;
+    private readonly ITaskActionLogger _actionLogger;
 
-    public TaskService(ITaskRepository taskRepository)
+    public TaskService(ITaskRepository taskRepository, ITaskActionLogger actionLogger)
     {
         _taskRepository = taskRepository;
+        _actionLogger = actionLogger;
     }
 
     public async Task DeleteTaskAsync(string taskId, CancellationToken cancellationToken)
@@ -19,6 +21,7 @@ public class TaskService : ITaskService
         ThrowIfNotGuidOrNull(taskId);
 
         await _taskRepository.DeleteTaskAsync(taskId, cancellationToken);
+        await _actionLogger.LogDeleteAsync(taskId, cancellationToken);
     }
 
     public async Task<TaskViewFull> GetTaskAsync(string taskId, CancellationToken cancellationToken)
@@ -69,6 +72,7 @@ public class TaskService : ITaskService
             };
 
             var created = await _taskRepository.CreateTaskAsync(entityToCreate, cancellationToken);
+            await _actionLogger.LogCreateAsync(entityToCreate.Id, cancellationToken);
 
             return created.Id;
         }
@@ -88,16 +92,18 @@ public class TaskService : ITaskService
         };
 
         var updated = await _taskRepository.UpdateTaskAsync(updatedEntity, cancellationToken);
+        await _actionLogger.LogUpdateAsync(taskDetails.Id, cancellationToken);
 
         return updated.Id;
     }
 
-    public Task UpdateTaskRootAsync(string taskId, string? newRootId, CancellationToken cancellationToken)
+    public async Task UpdateTaskRootAsync(string taskId, string? newRootId, CancellationToken cancellationToken)
     {
         ThrowIfNotGuidOrNull(taskId);
         ThrowIfNotGuidOrNull(newRootId);
         
-        return _taskRepository.UpdateTaskRootAsync(taskId, newRootId, cancellationToken);
+        await _taskRepository.UpdateTaskRootAsync(taskId, newRootId, cancellationToken);
+        await _actionLogger.LogRootChangedAsync(taskId, newRootId, cancellationToken);
     }
 
     public async Task<IEnumerable<TaskSearchView>> SearchTasksAsync(string keyPhrase, int take, int skip, CancellationToken cancellationToken)

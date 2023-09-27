@@ -36,4 +36,7 @@ public static class MappingExtensions
         RootTask = entity.RootTask?.ToBaseView(),
         Subtasks = subtasks.ToList()
     };
+
+    public static LogEntryView ToView(this LogEntity entity) =>
+        new LogEntryView(entity.Id, entity.Action, entity.TimestampMsec, entity.EntityId, entity.Payload);
 }

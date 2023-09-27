@@ -2,7 +2,7 @@ using MCGAssignment.TodoList.DataTransferObjects;
 
 namespace MCGAssignment.TodoList.Models;
 
-public record TaskEntity
+public class TaskEntity
 {
     public required string Id { get; init; }
 
