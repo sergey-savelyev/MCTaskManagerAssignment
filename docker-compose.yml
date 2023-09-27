@@ -21,7 +21,8 @@ services:
     command: ["mysqld", "--default-authentication-plugin=mysql_native_password"]
   mcgassignmenttodolist:
     depends_on:
-      - db
+      db:
+        condition: service_completed_successfully
     image: mcgassignmenttodolist
     build:
       context: .
