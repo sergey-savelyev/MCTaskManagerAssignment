@@ -1,0 +1,20 @@
+body {
+    padding: 20px;
+}
+#subTitle {
+    font-size: 14px;
+    color: #999;
+}
+.table-container {
+    display: flex;
+    justify-content: center;
+}
+.hidden {
+    display: none;
+}
+#taskTable th.sorted-asc::after {
+    content: " ↑";
+}
+#taskTable th.sorted-desc::after {
+    content: " ↓";
+}
