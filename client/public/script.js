@@ -22,19 +22,13 @@ function createTask() {
         dueDate
     };
 
-    $.ajax({
-        url: 'http://localhost:5006/api/tasks',
-        method: 'POST',
-        contentType: 'application/json',
-        data: JSON.stringify(taskData),
-        success: function() {
-            $('#createTaskModal').modal('hide');
-            reloadTasks();
-        },
-            error: function() {
-            console.error(`Can't create a task`);
-        }
-    });
+    API.upsertTask(null, null, summary, priority, status, description, dueDate)
+      .done(function(data) {
+        $('#createTaskModal').modal('hide');
+        reloadTasks();
+      })
+      .fail(function(error) {
+      });
 }
 
 function reloadTasks(orderBy, desc) {
@@ -143,31 +137,28 @@ function clearTaskModal() {
 
 function openTaskDetails(taskId, error) {
     clearTaskModal();
-
-    $.ajax({
-      url: `http://localhost:5006/api/tasks/${taskId}`,
-      method: 'GET',
-      success: function(data) {
+    API.getTaskDetails(taskId)
+      .done(function(data) {
         if (data.rootTask) {
-            $('#noRootTaskMessage').hide();
-            $('#assignLinkContainer').hide();
-            $('#rootTaskTable').show();
+          $('#noRootTaskMessage').hide();
+          $('#assignLinkContainer').hide();
+          $('#rootTaskTable').show();
 
-            const tableRow = `
-                <tr>
-                <td class="hidden">${data.rootTask.id}</td>
-                <td>${data.rootTask.summary}</td>
-                <td>${data.rootTask.priority}</td>
-                <td>${data.rootTask.status}</td>
-                <td>
-                  <button class="btn btn-sm btn-danger delete-button">
-                      <span aria-hidden="true">&times;</span>
-                  </button>
-                </td>
-                </tr>
-            `;
+          const tableRow = `
+              <tr>
+              <td class="hidden">${data.rootTask.id}</td>
+              <td>${data.rootTask.summary}</td>
+              <td>${data.rootTask.priority}</td>
+              <td>${data.rootTask.status}</td>
+              <td>
+                <button class="btn btn-sm btn-danger delete-button">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+              </td>
+              </tr>
+          `;
 
-            $('#rootTaskTableBody').append(tableRow);
+          $('#rootTaskTableBody').append(tableRow);
         } else {
           $('#rootTaskTable').hide();
           $('#noRootTaskMessage').show();
@@ -175,18 +166,19 @@ function openTaskDetails(taskId, error) {
         }
 
         $('#taskDetailsModalLabel').text(data?.summary?.substring(0,10));
-  
-        $('#taskId').val(data?.id);
+
+        $('#taskDetailsModal').data('task-id', data?.id);
+        $('#taskDetailsModal').data('root-id', data?.rootId);
+
         $('#summary').val(data?.summary);
         $('#description').val(data?.description);
-        $('#rootId').val(data?.rootId);
-  
+
         const createDateFormatted = moment(data.createDate).format('DD.MM.yyyy');
 
         $('#createDate').text(`Created: ${createDateFormatted}`);
         const dueDate = data?.dueDate ? new Date(data.dueDate).toISOString().split('T')[0] : '';
         $('#dueDate').val(dueDate);
-  
+
         $('#priority').val(data?.priority);
         $('#status').val(data?.status);
 
@@ -205,12 +197,12 @@ function openTaskDetails(taskId, error) {
                 `;
                 $('#subtasksTableBody').append(row);
             });
-  
+
         } else {
             $('#subtasksTable').hide();
             $('#noSubtasksMessage').show();
         }
-  
+
         $('#taskDetailsModal').modal('show');
 
         if (error) {
@@ -218,11 +210,9 @@ function openTaskDetails(taskId, error) {
             $('#te_alert').show();
             $('#te_alertText').text(error.responseText);
         }
-      },
-      error: function() {
-        console.error('Task details retrieving error');
-      }
-    });
+      })
+      .fail(function(error) {
+      });
 }
 
   $('#subtasksTable').on('click', 'tbody tr', function() {
@@ -244,8 +234,7 @@ function openTaskDetails(taskId, error) {
     $('#taskDetailsModal').modal('hide');
   
     $('#rootSearch').modal('show');
-    $('#rootSearch').find('#assignedTaskId').val(taskId);
-    $('#rootSearch').find('#assignedSummary').val(summary);
+    $('#rootSearch').data('task-id', taskId);
   });
 
 $('#createTaskBtn').click(function() {
@@ -281,16 +270,13 @@ $('#searchPhrase').on('input', function() {
 });
 
 function performSearch(phrase) {
-  $.ajax({
-    url: `http://localhost:5006/api/tasks/search/${phrase}?take=20`,
-    method: 'GET',
-    success: function(data) {
+  API.getSearchResults(phrase)
+    .done(function(data) {
       updateSearchResults(data);
-    },
-    error: function() {
-      console.error('Search error');
-    }
-  });
+    })
+    .fail(function(error) {
+      console.error('Search error', error);
+    });
 }
 
 function updateSearchResults(results) {
@@ -317,14 +303,13 @@ function updateSearchResults(results) {
     const rootId = $(this).find('td.hidden').text();
   
     $('#taskDetailsModal').find('#rootId').val(rootId);
-    const taskId = $('#taskId').val()
+    const taskId = $('#taskDetailsModal').data('task-id');
 
     updateTaskRoot(taskId, rootId);
     clearAndCloseSearchModal(); 
   });
 
   $('#btnSaveChanges').on('click', function() {
-    console.log($('#rootId').val());
     updateTask();
   });
 
@@ -333,27 +318,22 @@ function updateSearchResults(results) {
         rootId: rootId
     };
 
-    $.ajax({
-        url: `http://localhost:5006/api/tasks/${taskId}/root`,
-        method: 'PATCH',
-        contentType: 'application/json',
-        data: JSON.stringify(requestBody),
-        success: function(data) {
-            $('#liveToast').toast('show');
+    API.updateTaskRoot(taskId, rootId)
+      .done(function(data) {
+        $('#liveToast').toast('show');
 
-            openTaskDetails(taskId);
-        },
-        error: function(error) {
-            console.error('Error trying to update root:', error);
+        openTaskDetails(taskId);
+      })
+      .fail(function(error) {
+        console.error('Error making PATCH request:', error);
 
-            openTaskDetails(taskId, error);
-        }
-    });
+        openTaskDetails(taskId, error);
+      });
 }
 
 function updateTask() {
-    const taskId = $('#taskId').val();
-    const rootId = $('#rootId').val() === '' ? null : $('#rootId').val();
+    const taskId = $('#taskDetailsModal').data('task-id');
+    const rootId = $('#taskDetailsModal').data('root-id') === '' ? null : $('#taskDetailsModal').data('root-id');
     const summary = $('#summary').val();
     const priority = $('#priority').val();
     const status = $('#status').val();
@@ -370,18 +350,13 @@ function updateTask() {
         dueDate: dueDate
     };
 
-    $.ajax({
-        url: 'http://localhost:5006/api/tasks',
-        method: 'POST',
-        contentType: 'application/json',
-        data: JSON.stringify(requestBody),
-        success: function(data) {
-            $('#liveToast').toast('show');
-        },
-            error: function(error) {
-            console.error('Error making POST request:', error);
-        }
-    });
+    API.upsertTask(taskId, rootId, summary, priority, status, description, dueDate)
+      .done(function(data) {
+        $('#liveToast').toast('show');
+      })
+      .fail(function(error) {
+        console.error('Error making POST request:', error);
+      });
 }
 
 $('#taskTable th').on('click', function() {
@@ -405,7 +380,7 @@ $('#taskTable tbody').on('click', '.delete-button', function(event) {
 
 $('#rootTaskTable tbody').on('click', '.delete-button', function(event) {
   event.stopPropagation();
-  $('#rootId').val('');
+  $('#taskDetailsModal').data('root-id', null);
   $(this).closest('tr').remove();
 });
 
@@ -420,19 +395,65 @@ $('#btnRefreshLogs').click(function() {
 });
 
 function deleteTask(taskId) {
-  $.ajax({
-      url: `http://localhost:5006/api/tasks/${taskId}`,
-      method: 'DELETE',
-      success: function(data) {
-          reloadTasks();
-      },
-      error: function(error) {
-          console.error('Error making POST request:', error);
-      }
-  });
+  API.deleteTask(taskId)
+    .done(function(data) {
+      reloadTasks();
+    })
+    .fail(function(error) {
+      console.error('Error making DELETE request:', error);
+    });
 }
 
 $(document).ready(function() {
     loadTasks();
     loadLogs();
 });
+
+const API = {
+  getTasks: function() {
+    return $.ajax({
+      url: `http://localhost:5006/api/tasks`,
+      method: 'GET'
+    });
+  },
+  getLogs: function() {
+    return $.ajax({
+      url: `http://localhost:5006/api/tasks/logs`,
+      method: 'GET'
+    });
+  },
+  getTaskDetails: function(taskId) {
+    return $.ajax({
+      url: `http://localhost:5006/api/tasks/${taskId}`,
+      method: 'GET'
+    });
+  },
+  getSearchResults: function(phrase) {
+    return $.ajax({
+      url: `http://localhost:5006/api/tasks/search/${phrase}?skip=0&take=10`,
+      method: 'GET'
+    });
+  },
+  updateTaskRoot: function(taskId, rootId) {
+    return $.ajax({
+      url: `http://localhost:5006/api/tasks/${taskId}/root`,
+      method: 'PATCH',
+      contentType: 'application/json',
+      data: JSON.stringify({ rootId })
+    });
+  },
+  upsertTask: function(taskId, rootId, summary, priority, status, description, dueDate) {
+    return $.ajax({
+      url: `http://localhost:5006/api/tasks`,
+      method: 'POST',
+      contentType: 'application/json',
+      data: JSON.stringify({ id: taskId, rootId, summary, priority, status, description, dueDate })
+    });
+  },
+  deleteTask: function(taskId) {
+    return $.ajax({
+      url: `http://localhost:5006/api/tasks/${taskId}`,
+      method: 'DELETE'
+    });
+  }
+};

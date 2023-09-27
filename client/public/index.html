@@ -77,8 +77,6 @@
         </button>
       </div>
       <div class="modal-body">
-        <input type="hidden" class="form-control" id="assignedTaskId">
-        <input type="hidden" class="form-control" id="assignedSummary">
         <div class="form-group">
           <label for="searchPhrase">Search</label>
           <input type="text" class="form-control" id="searchPhrase" placeholder="Enter search phrase">
@@ -170,14 +168,10 @@
             <label for="dueDate">Due Date</label>
             <input type="date" class="form-control" id="dueDate" value="DD.MM-yyyy">
           </div>
-          <input type="hidden" id="rootId" name="rootId">
-          <input type="hidden" id="taskId" name="taskId">
-
           <div class="form-group">
             <label for="description">Description</label>
             <textarea class="form-control" id="description" rows="5"></textarea>
           </div>
-
           <div class="form-group">
             <label for="Subtasks">Subtasks</label>
             <div class="text-secondary text-center my-2" id="noSubtasksMessage" style="display: none;">No subtasks</div>
