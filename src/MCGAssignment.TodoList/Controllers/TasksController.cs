@@ -68,9 +68,9 @@ public class TasksController : ControllerBase
 
             return NoContent();
         }
-        catch (EntityNotFoundException ex)
+        catch (InvalidRootBindingException ex)
         {
-            return NotFound(ex.Message);
+            return BadRequest(ex.Message);
         }
     }
 

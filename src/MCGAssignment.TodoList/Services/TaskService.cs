@@ -16,11 +16,15 @@ public class TaskService : ITaskService
 
     public async Task DeleteTaskAsync(string taskId, CancellationToken cancellationToken)
     {
+        ThrowIfNotGuidOrNull(taskId);
+
         await _taskRepository.DeleteTaskAsync(taskId, cancellationToken);
     }
 
     public async Task<TaskViewFull> GetTaskAsync(string taskId, CancellationToken cancellationToken)
     {
+        ThrowIfNotGuidOrNull(taskId);
+
         var taskDocument = await _taskRepository.GetTaskAsync(taskId, cancellationToken);
 
         if (taskDocument is null)
@@ -69,9 +73,13 @@ public class TaskService : ITaskService
             return created.Id;
         }
 
-        var documentToUpdate = new TaskEntity
+        ThrowIfNotGuidOrNull(taskDetails.Id);
+        ThrowIfNotGuidOrNull(taskDetails.RootId);
+
+        var updatedEntity = new TaskEntity
         {
             Id = taskDetails.Id,
+            RootTaskId = taskDetails.RootId,
             Summary = taskDetails.Summary,
             Description = taskDetails.Description,
             DueDate = taskDetails.DueDate,
@@ -79,17 +87,17 @@ public class TaskService : ITaskService
             Status = taskDetails.Status
         };
 
-        var updated = await _taskRepository.UpdateTaskAsync(documentToUpdate, cancellationToken);
+        var updated = await _taskRepository.UpdateTaskAsync(updatedEntity, cancellationToken);
 
         return updated.Id;
     }
 
-    public async Task UpdateTaskRootAsync(string taskId, string? newRootId, CancellationToken cancellationToken)
+    public Task UpdateTaskRootAsync(string taskId, string? newRootId, CancellationToken cancellationToken)
     {
-        var entity = await _taskRepository.GetTaskAsync(taskId, cancellationToken).ConfigureAwait(false);
-        var updated = entity with { RootTaskId = newRootId };
-
-        await _taskRepository.UpdateTaskAsync(updated, cancellationToken).ConfigureAwait(false);
+        ThrowIfNotGuidOrNull(taskId);
+        ThrowIfNotGuidOrNull(newRootId);
+        
+        return _taskRepository.UpdateTaskRootAsync(taskId, newRootId, cancellationToken);
     }
 
     public async Task<IEnumerable<TaskSearchView>> SearchTasksAsync(string keyPhrase, int take, int skip, CancellationToken cancellationToken)
@@ -98,5 +106,13 @@ public class TaskService : ITaskService
         var searchResult = entities.Select(x => new TaskSearchView(x.Id, x.Summary, x.Description));
 
         return searchResult;
+    }
+
+    private static void ThrowIfNotGuidOrNull(string? id)
+    {
+        if (id is not null && !Guid.TryParse(id, out _))
+        {
+            throw new ArgumentException("Id must be Guid or null");
+        }
     }
 }

@@ -12,6 +12,8 @@ public interface ITaskRepository
 
     Task<TaskEntity> UpdateTaskAsync(TaskEntity task, CancellationToken cancellationToken);
 
+    Task UpdateTaskRootAsync(string taskId, string? newRootTaskId, CancellationToken cancellationToken);
+
     Task<TaskEntity> CreateTaskAsync(TaskEntity task, CancellationToken cancellationToken);
 
     Task DeleteTaskAsync(string id, CancellationToken cancellationToken);

@@ -46,12 +46,12 @@
             "dockerBuild": {
                 "tag": "mctaskmanagerassignment:dev",
                 "target": "base",
-                "dockerfile": "${workspaceFolder}/MCTaskManagerAssignment/Dockerfile",
+                "dockerfile": "${workspaceFolder}/src/MCGAssignment.TodoList/Dockerfile",
                 "context": "${workspaceFolder}",
                 "pull": true
             },
             "netCore": {
-                "appProject": "${workspaceFolder}/MCTaskManagerAssignment/MCTaskManagerAssignment.csproj"
+                "appProject": "${workspaceFolder}/src/MCGAssignment.TodoList/MCGAssignment.TodoList.csproj"
             }
         },
         {
@@ -62,7 +62,7 @@
             ],
             "dockerBuild": {
                 "tag": "mctaskmanagerassignment:latest",
-                "dockerfile": "${workspaceFolder}/MCTaskManagerAssignment/Dockerfile",
+                "dockerfile": "${workspaceFolder}/src/MCGAssignment.TodoList/Dockerfile",
                 "context": "${workspaceFolder}",
                 "platform": {
                     "os": "linux",
@@ -71,7 +71,7 @@
                 "pull": true
             },
             "netCore": {
-                "appProject": "${workspaceFolder}/MCTaskManagerAssignment/MCTaskManagerAssignment.csproj"
+                "appProject": "${workspaceFolder}/src/MCGAssignment.TodoList/MCGAssignment.TodoList.csproj"
             }
         },
         {
@@ -82,7 +82,7 @@
             ],
             "dockerRun": {},
             "netCore": {
-                "appProject": "${workspaceFolder}/MCTaskManagerAssignment/MCTaskManagerAssignment.csproj",
+                "appProject": "${workspaceFolder}/src/MCGAssignment.TodoList/MCGAssignment.TodoList.csproj",
                 "enableDebugging": true
             }
         },
@@ -94,7 +94,7 @@
             ],
             "dockerRun": {},
             "netCore": {
-                "appProject": "${workspaceFolder}/MCTaskManagerAssignment/MCTaskManagerAssignment.csproj"
+                "appProject": "${workspaceFolder}/src/MCGAssignment.TodoList/MCGAssignment.TodoList.csproj"
             }
         }
     ]

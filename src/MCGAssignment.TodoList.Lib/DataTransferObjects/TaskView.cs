@@ -26,6 +26,8 @@ public record TaskViewDetailed : TaskViewBase
 
 public record TaskViewFull : TaskViewDetailed
 {
+    public TaskViewBase? RootTask { get; init; }
+
     public List<TaskViewBase> Subtasks { get; init; } = new();
 
     public string? Description { get; init; }

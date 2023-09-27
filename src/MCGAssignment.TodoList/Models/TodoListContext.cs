@@ -28,6 +28,8 @@ public class TodoListContext : DbContext
                 .WithOne()
                 .HasForeignKey<TaskEntity>(e => e.RootTaskId)
                 .OnDelete(DeleteBehavior.SetNull);
+
+            entity.Property(e => e.CreateDate).Metadata.SetAfterSaveBehavior(Microsoft.EntityFrameworkCore.Metadata.PropertySaveBehavior.Ignore);
         });
     }
 }

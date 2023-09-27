@@ -64,7 +64,15 @@ public class TaskRepository : ITaskRepository
     {
         keyPhrase = keyPhrase.Trim().ToLower();
         var entities = 
-            await _context.Task.Where(x => x.Summary.ToLower().Contains(keyPhrase)).Skip(skip).Take(take).ToListAsync(cancellationToken).ConfigureAwait(false);
+            await _context.Task
+                .Where(x => 
+                    x.Summary.ToLower().Contains(keyPhrase) 
+                    || (x.Description != null && x.Description.ToLower().Contains(keyPhrase)))
+                .OrderBy(x => x.CreateDate)
+                .Skip(skip)
+                .Take(take)
+                .ToListAsync(cancellationToken)
+                .ConfigureAwait(false);
 
         return entities;
     }
@@ -77,12 +85,53 @@ public class TaskRepository : ITaskRepository
         return task;
     }
 
+    public async Task UpdateTaskRootAsync(string taskId, string? newRootTaskId, CancellationToken cancellationToken)
+    {
+        var isBindingAllowed = await IsBindingAllowedAsync(taskId, newRootTaskId, cancellationToken);
+
+        if (!isBindingAllowed)
+        {
+            throw new InvalidRootBindingException();
+        }
+
+        await _context.Task
+            .Where(x => x.Id == taskId)
+            .ExecuteUpdateAsync(x => x.SetProperty(e => e.RootTaskId, newRootTaskId), cancellationToken)
+            .ConfigureAwait(false);
+    }
+
     public async Task<TaskEntity> CreateTaskAsync(TaskEntity task, CancellationToken cancellationToken)
     {
         _context.Task.Add(task);
         await _context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
         return task;
+    }
+
+    private async Task<bool> IsBindingAllowedAsync(string taskId, string? rootId, CancellationToken cancellationToken)
+    {
+        if (rootId is null)
+        {
+            return true;
+        }
+
+        var allSubtaskIds = await _context.Database.SqlQueryRaw<string>(
+            @$"with recursive cte (Id, RootTaskId) as (
+                select     Id, 
+                            RootTaskId 
+                from       todolist.task 
+                where      RootTaskId = ""{taskId}""
+                union all
+                select     t.Id, 
+                            t.RootTaskId 
+                from       todolist.task t 
+                inner join cte
+                        on t.RootTaskId = cte.Id 
+            ) 
+            select cte.Id from cte;"
+        ).ToListAsync();
+
+        return !allSubtaskIds.Contains(rootId);
     }
 
     private static Expression<Func<TaskEntity, object?>> ResolveOrderProperty(string propertyName) => propertyName switch
