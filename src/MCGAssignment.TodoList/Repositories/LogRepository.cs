@@ -17,6 +17,7 @@ public class LogRepository : ILogRepository
     public async Task CreateLogEntryAsync(LogEntity entity, CancellationToken cancellationToken)
     {
         await _context.LogEntry.AddAsync(entity, cancellationToken);
+        await _context.SaveChangesAsync(cancellationToken);
     }
 
     public async Task<LogEntity> GetLogEntryAsync(string entityId, CancellationToken cancellationToken)

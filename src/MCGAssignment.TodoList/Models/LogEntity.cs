@@ -14,5 +14,5 @@ public class LogEntity
 
     public required string EntityType { get; init; }
 
-    public required JsonElement Payload { get; init; }
+    public string? Payload { get; init; }
 }

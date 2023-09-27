@@ -38,5 +38,5 @@ public static class MappingExtensions
     };
 
     public static LogEntryView ToView(this LogEntity entity) =>
-        new LogEntryView(entity.Id, entity.Action, entity.TimestampMsec, entity.EntityId, entity.Payload);
+        new LogEntryView(entity.Id, entity.Action, entity.TimestampMsec, entity.EntityId, entity.EntityType, entity.Payload);
 }

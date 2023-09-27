@@ -27,7 +27,6 @@ public class TaskActionLogger : ITaskActionLogger
             TimestampMsec = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
             EntityId = taskId,
             EntityType = typeof(TaskEntity).Name,
-            Payload = new JsonElement()
         };
 
         return _logRepository.CreateLogEntryAsync(entry, cancellationToken);
@@ -42,7 +41,6 @@ public class TaskActionLogger : ITaskActionLogger
             TimestampMsec = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
             EntityId = taskId,
             EntityType = typeof(TaskEntity).Name,
-            Payload = new JsonElement()
         };
 
         return _logRepository.CreateLogEntryAsync(entry, cancellationToken);
@@ -57,7 +55,7 @@ public class TaskActionLogger : ITaskActionLogger
             TimestampMsec = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
             EntityId = taskId,
             EntityType = typeof(TaskEntity).Name,
-            Payload = JsonSerializer.SerializeToElement(new { RootId = rootId })
+            Payload = JsonSerializer.Serialize(new { RootId = rootId })
         };
 
         return _logRepository.CreateLogEntryAsync(entry, cancellationToken);
@@ -72,7 +70,6 @@ public class TaskActionLogger : ITaskActionLogger
             TimestampMsec = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
             EntityId = taskId,
             EntityType = typeof(TaskEntity).Name,
-            Payload = new JsonElement()
         };
 
         return _logRepository.CreateLogEntryAsync(entry, cancellationToken);

@@ -119,12 +119,12 @@ public class TaskRepository : ITaskRepository
             @$"with recursive cte (Id, RootTaskId) as (
                 select     Id, 
                             RootTaskId 
-                from       todolist.task 
+                from       todolist.Task 
                 where      RootTaskId = ""{taskId}""
                 union all
                 select     t.Id, 
                             t.RootTaskId 
-                from       todolist.task t 
+                from       todolist.Task t 
                 inner join cte
                         on t.RootTaskId = cte.Id 
             ) 
