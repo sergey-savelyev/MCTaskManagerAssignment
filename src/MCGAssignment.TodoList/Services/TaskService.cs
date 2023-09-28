@@ -91,6 +91,11 @@ public class TaskService : ITaskService
             Status = taskDetails.Status
         };
 
+        if (updatedEntity.RootTaskId == updatedEntity.Id)
+        {
+            throw new InvalidRootBindingException("Can't bind task to itself");
+        }
+
         var updated = await _taskRepository.UpdateTaskAsync(updatedEntity, cancellationToken);
         await _actionLogger.LogUpdateAsync(taskDetails.Id, cancellationToken);
 
@@ -101,6 +106,11 @@ public class TaskService : ITaskService
     {
         ThrowIfNotGuidOrNull(taskId);
         ThrowIfNotGuidOrNull(newRootId);
+
+        if (taskId == newRootId)
+        {
+            throw new InvalidRootBindingException("Can't bind task to itself");
+        }
         
         await _taskRepository.UpdateTaskRootAsync(taskId, newRootId, cancellationToken);
         await _actionLogger.LogRootChangedAsync(taskId, newRootId, cancellationToken);
