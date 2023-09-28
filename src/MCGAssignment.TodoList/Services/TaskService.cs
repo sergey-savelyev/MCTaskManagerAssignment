@@ -18,7 +18,7 @@ public class TaskService : ITaskService
 
     public async Task DeleteTaskAsync(string taskId, CancellationToken cancellationToken)
     {
-        ThrowIfNotGuidOrNull(taskId);
+        taskId.ThrowIfNotGuid();
 
         await _taskRepository.DeleteTaskAsync(taskId, cancellationToken);
         await _actionLogger.LogDeleteAsync(taskId, cancellationToken);
@@ -26,7 +26,7 @@ public class TaskService : ITaskService
 
     public async Task<TaskViewFull> GetTaskAsync(string taskId, CancellationToken cancellationToken)
     {
-        ThrowIfNotGuidOrNull(taskId);
+        taskId.ThrowIfNotGuid();
 
         var taskDocument = await _taskRepository.GetTaskAsync(taskId, cancellationToken);
 
@@ -77,8 +77,8 @@ public class TaskService : ITaskService
             return created.Id;
         }
 
-        ThrowIfNotGuidOrNull(taskDetails.Id);
-        ThrowIfNotGuidOrNull(taskDetails.RootId);
+        taskDetails.Id.ThrowIfNotGuid();
+        taskDetails.RootId.ThrowIfNotGuid();
 
         var updatedEntity = new TaskEntity
         {
@@ -104,8 +104,8 @@ public class TaskService : ITaskService
 
     public async Task UpdateTaskRootAsync(string taskId, string? newRootId, CancellationToken cancellationToken)
     {
-        ThrowIfNotGuidOrNull(taskId);
-        ThrowIfNotGuidOrNull(newRootId);
+        taskId.ThrowIfNotGuid();
+        newRootId.ThrowIfNotGuid();
 
         if (taskId == newRootId)
         {
@@ -122,13 +122,5 @@ public class TaskService : ITaskService
         var searchResult = entities.Select(x => new TaskSearchView(x.Id, x.Summary, x.Description));
 
         return searchResult;
-    }
-
-    private static void ThrowIfNotGuidOrNull(string? id)
-    {
-        if (id is not null && !Guid.TryParse(id, out _))
-        {
-            throw new ArgumentException("Id must be Guid or null");
-        }
     }
 }

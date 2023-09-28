@@ -19,4 +19,4 @@ public record UpsertTaskData
     public string? Description { get; init; }
     
     public DateTime DueDate { get; init; }
-};
+}
