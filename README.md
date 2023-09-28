@@ -16,8 +16,10 @@ After the deployment is complete and all three containers are running, go to `lo
 ## Using the Application
 
 - On the main page, there are 2 tabs: "Tasks" and "Logs."
+  ![Main screen](docs/screenshot-1.png?raw=true "Main screen")
 - By default, the "Tasks" tab is selected, and it should be empty for you if you run the app for the fist time. To create your first task, you'll need to click on the corresponding button in the top left corner.
 - You can edit an already created task. Click "assign?" if you want to assign the root task for the task you're editing. Keep in mind that the opened search window looks for both the summary and the description of the task.
+  ![Task details screen](docs/screenshot-2.png?raw=true "Task details screen")
 - The application will not allow you to create a loop in the chain by assigning one of the sub-tasks as a parent to it's root task. You can navigate through the task chain by clicking on the root tasks in the upper part of the modal window or on the sub-tasks in the lower part.
 - Please note that the list displays **ONLY top-level** tasks that have **no root tasks**. You can sort the list by clicking on the column headers.
 
