@@ -1,5 +1,3 @@
-using System.Text.Json;
-
 namespace MCGAssignment.TodoList.DataTransferObjects;
 
-public record LogEntryView(string Id, string Action, long TimestampMsec, string EntityId, string EntityType, string? Payload);
+public record LogEntryView(Guid Id, string Action, long TimestampMsec, Guid? EntityId, string EntityType, string? Payload);

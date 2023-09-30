@@ -21,7 +21,12 @@ public class TaskLogsController : ControllerBase
         [FromQuery] int take = 20, [FromQuery] string orderby = nameof(LogEntryView.TimestampMsec),
         bool descending = true)
     {
-        var logs = await _taskActionLogService.GetTaskActionLogBatchByTaskAsync(taskId, skip, take, orderby, descending, cancellationToken);
+        if (!Guid.TryParse(taskId, out var taskIdGuid))
+        {
+            return BadRequest("Invalid task id");
+        }
+
+        var logs = await _taskActionLogService.GetTaskActionLogBatchByTaskAsync(taskIdGuid, skip, take, orderby, descending, cancellationToken);
 
         return Ok(logs);
     }
