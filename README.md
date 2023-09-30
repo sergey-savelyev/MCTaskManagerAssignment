@@ -1,3 +1,11 @@
+## CHANGELOG
+
+#### 30/09/2023 Update:
+- Upsert task split to two methods: Update task and Create task;
+- RootId of the task can no longer be changed via Update method. Use Change Task Root method instead;
+- Redundant repository classes and interfaces were removed;
+- Optimized utilization of DbContext class;
+- Minor refactoring and improvements.
 
 # Welcome aboard!
 
@@ -82,21 +90,34 @@ The Task API allows users to manage tasks and perform various operations related
 - **Response**:
   - 200 OK: Returns a list of root tasks.
 
-#### Upsert Task
+#### Create Task
 
 - **URL**: `/api/tasks`
 - **Method**: POST
 - **Parameters**:
-  - `taskData` (Request Body): Task data to create or update a task.
-    - `Id` (string, optional): Task ID.
-    - `RootId` (string, optional): Root ID for the task.
+  - `taskData` (Request Body): Task data to create a task.
     - `Summary` (string, required): Summary of the task.
     - `Priority` (enum, required): Task priority. Possible values: "High", "Medium", "Low".
     - `Status` (enum, required): Task status. Possible values: "NotStarted", "InProgress", "Completed".
     - `Description` (string, optional): Description of the task.
     - `DueDate` (string, required): Due date of the task.
 - **Response**:
-  - 200 OK: Returns the ID of the created or updated task.
+  - 200 OK: Returns the ID of the created task.
+
+#### Update Task
+
+- **URL**: `/api/tasks/{taskId}`
+- **Method**: POST
+- **Parameters**:
+  - `{taskId}`: Task ID to update.
+  - `taskData` (Request Body): Task data to create or update a task.
+    - `Summary` (string, required): Summary of the task.
+    - `Priority` (enum, required): Task priority. Possible values: "High", "Medium", "Low".
+    - `Status` (enum, required): Task status. Possible values: "NotStarted", "InProgress", "Completed".
+    - `Description` (string, optional): Description of the task.
+    - `DueDate` (string, required): Due date of the task.
+- **Response**:
+  - 200 OK: The task successfully updated.
 
 #### Change Task Root
 
