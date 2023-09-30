@@ -93,7 +93,7 @@ public class TasksController : ControllerBase
             return BadRequest("Invalid task id");
         }
 
-        if (!Guid.TryParse(taskId, out var rootIdGuid))
+        if (!Guid.TryParse(newRoot.RootId, out var rootIdGuid))
         {
             return BadRequest("Invalid task id");
         }

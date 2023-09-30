@@ -21,12 +21,12 @@ public class TodoListContext : DbContext
             @$"with recursive cte (Id, RootTaskId) as (
                 select     Id, 
                             RootTaskId 
-                from       todolist.Task 
+                from       todolist.Tasks 
                 where      RootTaskId = ""{taskId}""
                 union all
                 select     t.Id, 
                             t.RootTaskId 
-                from       todolist.Task t 
+                from       todolist.Tasks t 
                 inner join cte
                         on t.RootTaskId = cte.Id 
             ) 
