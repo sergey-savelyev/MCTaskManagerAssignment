@@ -22,7 +22,7 @@ function createTask() {
         dueDate
     };
 
-    API.upsertTask(null, null, summary, priority, status, description, dueDate)
+    API.createTask(summary, priority, status, description, dueDate)
       .done(function(data) {
         $('#createTaskModal').modal('hide');
         reloadTasks();
@@ -215,27 +215,27 @@ function openTaskDetails(taskId, error) {
       });
 }
 
-  $('#subtasksTable').on('click', 'tbody tr', function() {
-    const taskId = $(this).find('td.hidden').text();
-  
-    openTaskDetails(taskId);
-  });
+$('#subtasksTable').on('click', 'tbody tr', function() {
+  const taskId = $(this).find('td.hidden').text();
 
-  $('#rootTaskTable').on('click', 'tbody tr', function() {
-    const taskId = $(this).find('td.hidden').text();
-  
-    openTaskDetails(taskId);
-  });
+  openTaskDetails(taskId);
+});
 
-  $('#assignLink').click(function() {
-    const taskId = $('#taskId').val();
-    const summary = $('#summary').val();
-  
-    $('#taskDetailsModal').modal('hide');
-  
-    $('#rootSearch').modal('show');
-    $('#rootSearch').data('task-id', taskId);
-  });
+$('#rootTaskTable').on('click', 'tbody tr', function() {
+  const taskId = $(this).find('td.hidden').text();
+
+  openTaskDetails(taskId);
+});
+
+$('#assignLink').click(function() {
+  const taskId = $('#taskId').val();
+  const summary = $('#summary').val();
+
+  $('#taskDetailsModal').modal('hide');
+
+  $('#rootSearch').modal('show');
+  $('#rootSearch').data('task-id', taskId);
+});
 
 $('#createTaskBtn').click(function() {
     createTask();
@@ -255,7 +255,6 @@ $('#loadMoreTasksBtn').click(function() {
 $('#loadMoreLogsBtn').click(function() {
   loadLogs();
 });
-
 
 let searchTimeout;
 
@@ -280,55 +279,55 @@ function performSearch(phrase) {
 }
 
 function updateSearchResults(results) {
-    const searchResultsTable = $('#searchResultsTable tbody');
-    searchResultsTable.empty();
-  
-    results.forEach(function(result) {
-      const summary = result.summary.substring(0, 40);
-      const description = result.description.substring(0, 40);
-      const row = `<tr><td class="hidden">${result.id}</td><td>${summary}</td><td>${description}</td></tr>`;
-      searchResultsTable.append(row);
+  const searchResultsTable = $('#searchResultsTable tbody');
+  searchResultsTable.empty();
+
+  results.forEach(function(result) {
+    const summary = result.summary.substring(0, 40);
+    const description = result.description.substring(0, 40);
+    const row = `<tr><td class="hidden">${result.id}</td><td>${summary}</td><td>${description}</td></tr>`;
+    searchResultsTable.append(row);
+  });
+}
+
+function clearAndCloseSearchModal() {
+  $('#searchPhrase').val('');
+
+  $('#searchResultsTable tbody').empty();
+
+  $('#rootSearch').modal('hide');
+}
+
+$('#searchResultsTable').on('click', 'tbody tr', function() {
+  const rootId = $(this).find('td.hidden').text();
+
+  $('#taskDetailsModal').find('#rootId').val(rootId);
+  const taskId = $('#taskDetailsModal').data('task-id');
+
+  updateTaskRoot(taskId, rootId);
+  clearAndCloseSearchModal(); 
+});
+
+$('#btnSaveChanges').on('click', function() {
+  updateTask();
+});
+
+function updateTaskRoot(taskId, rootId) {
+  const requestBody = {
+      rootId: rootId
+  };
+
+  API.updateTaskRoot(taskId, rootId)
+    .done(function(data) {
+      $('#liveToast').toast('show');
+
+      openTaskDetails(taskId);
+    })
+    .fail(function(error) {
+      console.error('Error making PATCH request:', error);
+
+      openTaskDetails(taskId, error);
     });
-  }
-
-  function clearAndCloseSearchModal() {
-    $('#searchPhrase').val('');
-  
-    $('#searchResultsTable tbody').empty();
-  
-    $('#rootSearch').modal('hide');
-  }
-
-  $('#searchResultsTable').on('click', 'tbody tr', function() {
-    const rootId = $(this).find('td.hidden').text();
-  
-    $('#taskDetailsModal').find('#rootId').val(rootId);
-    const taskId = $('#taskDetailsModal').data('task-id');
-
-    updateTaskRoot(taskId, rootId);
-    clearAndCloseSearchModal(); 
-  });
-
-  $('#btnSaveChanges').on('click', function() {
-    updateTask();
-  });
-
-  function updateTaskRoot(taskId, rootId) {
-    const requestBody = {
-        rootId: rootId
-    };
-
-    API.updateTaskRoot(taskId, rootId)
-      .done(function(data) {
-        $('#liveToast').toast('show');
-
-        openTaskDetails(taskId);
-      })
-      .fail(function(error) {
-        console.error('Error making PATCH request:', error);
-
-        openTaskDetails(taskId, error);
-      });
 }
 
 function updateTask() {
@@ -350,12 +349,14 @@ function updateTask() {
         dueDate: dueDate
     };
 
-    API.upsertTask(taskId, rootId, summary, priority, status, description, dueDate)
+    API.updateTask(taskId, summary, priority, status, description, dueDate)
       .done(function(data) {
-        $('#liveToast').toast('show');
+        $('#te_alertSuccessText').text('Successfully updated');
+        $('#te_alertSuccess').show();
       })
       .fail(function(error) {
-        console.error('Error making POST request:', error);
+        $('#te_alertText').text(error.responseText);
+        $('#te_alert').show();
       });
 }
 
@@ -381,7 +382,16 @@ $('#taskTable tbody').on('click', '.delete-button', function(event) {
 $('#rootTaskTable tbody').on('click', '.delete-button', function(event) {
   event.stopPropagation();
   $('#taskDetailsModal').data('root-id', null);
-  $(this).closest('tr').remove();
+  API.updateTaskRoot($('#taskDetailsModal').data('task-id'), null)
+    .done(function(data) {
+      $(this).closest('tr').remove();
+      $('#te_alertSuccessText').text('Successfully updated');
+      $('#te_alertSuccess').show();
+    })
+    .fail(function(error) {
+      $("#te_alertText").text(error.responseText);
+      $("#te_alert").show();
+    });
 });
 
 $('#confirmDelete').click(function() {
@@ -442,12 +452,20 @@ const API = {
       data: JSON.stringify({ rootId })
     });
   },
-  upsertTask: function(taskId, rootId, summary, priority, status, description, dueDate) {
+  createTask: function(summary, priority, status, description, dueDate) {
     return $.ajax({
       url: `http://localhost:5006/api/tasks`,
       method: 'POST',
       contentType: 'application/json',
-      data: JSON.stringify({ id: taskId, rootId, summary, priority, status, description, dueDate })
+      data: JSON.stringify({ summary, priority, status, description, dueDate })
+    });
+  },
+  updateTask: function(taskId, summary, priority, status, description, dueDate) {
+    return $.ajax({
+      url: `http://localhost:5006/api/tasks/${taskId}`,
+      method: 'PATCH',
+      contentType: 'application/json',
+      data: JSON.stringify({ summary, priority, status, description, dueDate })
     });
   },
   deleteTask: function(taskId) {
