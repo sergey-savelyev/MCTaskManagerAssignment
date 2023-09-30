@@ -4,10 +4,6 @@ namespace MCGAssignment.TodoList.DataTransferObjects;
 
 public record UpsertTaskData
 {
-    public string? Id { get; init; }
-
-    public string? RootId { get; init; }
-
     public required string Summary { get; init; }
 
     [JsonConverter(typeof(JsonStringEnumConverter))]

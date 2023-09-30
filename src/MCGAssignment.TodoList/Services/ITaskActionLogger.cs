@@ -2,11 +2,11 @@ namespace MCGAssignment.TodoList.Services;
 
 public interface ITaskActionLogger
 {
-    Task LogCreateAsync(string taskId, CancellationToken cancellationToken);
+    Task LogCreateAsync(Guid taskId, CancellationToken cancellationToken);
 
-    Task LogUpdateAsync(string taskId, CancellationToken cancellationToken);
+    Task LogUpdateAsync(Guid taskId, CancellationToken cancellationToken);
 
-    Task LogDeleteAsync(string taskId, CancellationToken cancellationToken);
+    Task LogDeleteAsync(Guid taskId, CancellationToken cancellationToken);
 
-    Task LogRootChangedAsync(string taskId, string? rootId, CancellationToken cancellationToken);
+    Task LogRootChangedAsync(Guid taskId, Guid? rootId, CancellationToken cancellationToken);
 }

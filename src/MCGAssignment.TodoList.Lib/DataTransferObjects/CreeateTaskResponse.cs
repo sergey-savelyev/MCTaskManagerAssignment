@@ -1,3 +1,3 @@
 namespace MCGAssignment.TodoList.DataTransferObjects;
 
-public record UpsertTaskResponse(string TaskId);
+public record CreeateTaskResponse(Guid TaskId);

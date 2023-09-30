@@ -11,46 +11,48 @@ public class TaskActionLogger : ITaskActionLogger
     private const string TaskActionUpdate = "TaskUpdate";
     private const string TaskActionRootChanged = "TaskRootChanged";
 
-    private readonly ILogRepository _logRepository;
+    private readonly TodoListContext _context;
 
-    public TaskActionLogger(ILogRepository logRepository)
+    public TaskActionLogger(TodoListContext context)
     {
-        _logRepository = logRepository;
+        _context = context;
     }
 
-    public Task LogCreateAsync(string taskId, CancellationToken cancellationToken)
+    public async Task LogCreateAsync(Guid taskId, CancellationToken cancellationToken)
     {
         var entry = new LogEntity
         {
-            Id = Guid.NewGuid().ToString(),
+            Id = Guid.NewGuid(),
             Action = TaskActionCreate,
             TimestampMsec = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
             EntityId = taskId,
             EntityType = typeof(TaskEntity).Name,
         };
 
-        return _logRepository.CreateLogEntryAsync(entry, cancellationToken);
+        await _context.Logs.AddAsync(entry, cancellationToken);
+        await _context.SaveChangesAsync(cancellationToken);
     }
 
-    public Task LogDeleteAsync(string taskId, CancellationToken cancellationToken)
+    public async Task LogDeleteAsync(Guid taskId, CancellationToken cancellationToken)
     {
         var entry = new LogEntity
         {
-            Id = Guid.NewGuid().ToString(),
+            Id = Guid.NewGuid(),
             Action = TaskActionDelete,
             TimestampMsec = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
             EntityId = taskId,
             EntityType = typeof(TaskEntity).Name,
         };
 
-        return _logRepository.CreateLogEntryAsync(entry, cancellationToken);
+        await _context.Logs.AddAsync(entry, cancellationToken);
+        await _context.SaveChangesAsync(cancellationToken);
     }
 
-    public Task LogRootChangedAsync(string taskId, string? rootId, CancellationToken cancellationToken)
+    public async Task LogRootChangedAsync(Guid taskId, Guid? rootId, CancellationToken cancellationToken)
     {
         var entry = new LogEntity
         {
-            Id = Guid.NewGuid().ToString(),
+            Id = Guid.NewGuid(),
             Action = TaskActionRootChanged,
             TimestampMsec = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
             EntityId = taskId,
@@ -58,20 +60,22 @@ public class TaskActionLogger : ITaskActionLogger
             Payload = JsonSerializer.Serialize(new { RootId = rootId })
         };
 
-        return _logRepository.CreateLogEntryAsync(entry, cancellationToken);
+        await _context.Logs.AddAsync(entry, cancellationToken);
+        await _context.SaveChangesAsync(cancellationToken);
     }
 
-    public Task LogUpdateAsync(string taskId, CancellationToken cancellationToken)
+    public async Task LogUpdateAsync(Guid taskId, CancellationToken cancellationToken)
     {
         var entry = new LogEntity
         {
-            Id = Guid.NewGuid().ToString(),
+            Id = Guid.NewGuid(),
             Action = TaskActionUpdate,
             TimestampMsec = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
             EntityId = taskId,
             EntityType = typeof(TaskEntity).Name,
         };
 
-        return _logRepository.CreateLogEntryAsync(entry, cancellationToken);
+        await _context.Logs.AddAsync(entry, cancellationToken);
+        await _context.SaveChangesAsync(cancellationToken);
     }
 }

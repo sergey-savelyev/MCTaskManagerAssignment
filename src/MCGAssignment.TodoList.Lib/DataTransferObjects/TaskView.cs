@@ -4,7 +4,7 @@ namespace MCGAssignment.TodoList.DataTransferObjects;
 
 public record TaskViewBase
 {
-    public required string Id { get; init; }
+    public required Guid? Id { get; init; }
 
     public required string Summary { get; init; }
 
@@ -17,7 +17,7 @@ public record TaskViewBase
 
 public record TaskViewDetailed : TaskViewBase
 {
-    public string? RootId { get; init; }
+    public Guid? RootId { get; init; }
 
     public DateTime CreateDate { get; init; }
 
@@ -33,4 +33,4 @@ public record TaskViewFull : TaskViewDetailed
     public string? Description { get; init; }
 }
 
-public record TaskSearchView(string Id, string? Summary, string? Description);
+public record TaskSearchView(Guid Id, string? Summary, string? Description);

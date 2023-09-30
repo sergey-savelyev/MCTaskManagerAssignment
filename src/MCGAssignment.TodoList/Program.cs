@@ -1,4 +1,3 @@
-using MCGAssignment.TodoList.Models;
 using MCGAssignment.TodoList.Repositories;
 using MCGAssignment.TodoList.Services;
 using Microsoft.EntityFrameworkCore;
@@ -22,16 +21,13 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddControllers();
 
-builder.Services.AddScoped<ITaskRepository, TaskRepository>();
-builder.Services.AddScoped<ILogRepository, LogRepository>();
-
 builder.Services.AddScoped<ITaskService, TaskService>();
 builder.Services.AddScoped<ITaskActionLogger, TaskActionLogger>();
 builder.Services.AddScoped<ITaskActionLogService, TaskActionLogService>();
 
 builder.Services.AddDbContext<TodoListContext>(options => 
 {
-    options.UseLazyLoadingProxies().UseMySQL(builder.Configuration["ConnectionStrings:DefaultConnection"] ?? throw new Exception("Failed to initialize: connection string cannot be null"));
+    options.UseLazyLoadingProxies().UseMySQL(builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new Exception("Failed to initialize: connection string cannot be null"));
 });
 
 var app = builder.Build();
