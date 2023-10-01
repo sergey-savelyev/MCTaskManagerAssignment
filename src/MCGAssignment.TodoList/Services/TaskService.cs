@@ -134,7 +134,7 @@ public class TaskService : ITaskService
         entity.RootTaskId = newRootId;
         await _context.SaveChangesAsync(cancellationToken);
 
-        await _logService.LogTaskActionAsync(TaskAction.Update, taskId, new { RootId = newRootId }, cancellationToken);
+        await _logService.LogTaskActionAsync(TaskAction.RootChanged, taskId, new { RootId = newRootId }, cancellationToken);
     }
 
     public async Task<IEnumerable<TaskSearchView>> SearchTasksAsync(string keyPhrase, int take, int skip, CancellationToken cancellationToken)
