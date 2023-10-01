@@ -1,11 +1,16 @@
 ## CHANGELOG
 
+#### 01/10/2023 Update:
+- Namespaces improvements;
+- Task actions logging logic refactoring: redundand services removed;
+- Minor general refactoring and improvements;
+
 #### 30/09/2023 Update:
 - Upsert task split to two methods: Update task and Create task;
 - RootId of the task can no longer be changed via Update method. Use Change Task Root method instead;
 - Redundant repository classes and interfaces were removed;
 - Optimized utilization of DbContext class;
-- Minor refactoring and improvements.
+- Minor general refactoring and improvements.
 
 # Welcome aboard!
 
