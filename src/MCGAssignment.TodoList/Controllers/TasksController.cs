@@ -1,5 +1,5 @@
 using MCGAssignment.TodoList.Exceptions;
-using MCGAssignment.TodoList.DataTransferObjects;
+using MCGAssignment.TodoList.Lib.DataTransferObjects;
 using MCGAssignment.TodoList.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -17,16 +17,11 @@ public class TasksController : ControllerBase
     }
 
     [HttpGet("{taskId}")]
-    public async Task<IActionResult> GetTaskAsync([FromRoute] string taskId, CancellationToken cancellationToken)
+    public async Task<IActionResult> GetTaskAsync([FromRoute] Guid taskId, CancellationToken cancellationToken)
     {
-        if (!Guid.TryParse(taskId, out var taskIdGuid))
-        {
-            return BadRequest("Invalid task id");
-        }
-
         try
         {
-            var task = await _taskService.GetTaskAsync(taskIdGuid, cancellationToken);
+            var task = await _taskService.GetTaskAsync(taskId, cancellationToken);
 
             return Ok(task);
         }
@@ -66,16 +61,11 @@ public class TasksController : ControllerBase
 
 
     [HttpPatch("{taskId}")]
-    public async Task<IActionResult> UpdateTaskAsync([FromRoute] string taskId, [FromBody] UpsertTaskData taskData, CancellationToken cancellationToken)
+    public async Task<IActionResult> UpdateTaskAsync([FromRoute] Guid taskId, [FromBody] UpsertTaskData taskData, CancellationToken cancellationToken)
     {
-        if (!Guid.TryParse(taskId, out var taskIdGuid))
-        {
-            return BadRequest("Invalid task id");
-        }
-        
         try
         {
-            await _taskService.UpdateTaskAsync(taskIdGuid, taskData, cancellationToken);
+            await _taskService.UpdateTaskAsync(taskId, taskData, cancellationToken);
 
             return NoContent();
         }
@@ -86,21 +76,11 @@ public class TasksController : ControllerBase
     }
 
     [HttpPatch("{taskId}/root")]
-    public async Task<IActionResult> ChangeTaskRootAsync([FromRoute] string taskId, [FromBody] TaskRootData newRoot, CancellationToken cancellationToken)
+    public async Task<IActionResult> ChangeTaskRootAsync([FromRoute] Guid taskId, [FromBody] TaskRootData newRoot, CancellationToken cancellationToken)
     {
-        if (!Guid.TryParse(taskId, out var taskIdGuid))
-        {
-            return BadRequest("Invalid task id");
-        }
-
-        if (!Guid.TryParse(newRoot.RootId, out var rootIdGuid))
-        {
-            return BadRequest("Invalid task id");
-        }
-
         try
         {
-            await _taskService.UpdateTaskRootAsync(taskIdGuid, rootIdGuid, cancellationToken);
+            await _taskService.UpdateTaskRootAsync(taskId, newRoot.RootId, cancellationToken);
 
             return NoContent();
         }
@@ -111,16 +91,11 @@ public class TasksController : ControllerBase
     }
 
     [HttpDelete("{taskId}")]
-    public async Task<IActionResult> DeleteTaskAsync([FromRoute] string taskId, CancellationToken cancellationToken)
+    public async Task<IActionResult> DeleteTaskAsync([FromRoute] Guid taskId, CancellationToken cancellationToken)
     {
-        if (!Guid.TryParse(taskId, out var taskIdGuid))
-        {
-            return BadRequest("Invalid task id");
-        }
-
         try
         {
-            await _taskService.DeleteTaskAsync(taskIdGuid, cancellationToken);
+            await _taskService.DeleteTaskAsync(taskId, cancellationToken);
 
             return NoContent();
         }

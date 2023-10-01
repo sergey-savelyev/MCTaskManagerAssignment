@@ -5,35 +5,14 @@ using MySql.EntityFrameworkCore.Extensions;
 
 namespace MCGAssignment.TodoList.Repositories;
 
-public class TodoListContext : DbContext
+public class ApplicationDbContext : DbContext
 {
     public DbSet<TaskEntity> Tasks { get; set; }
 
     public DbSet<LogEntity> Logs { get; set; }
 
-    public TodoListContext(DbContextOptions<TodoListContext> options) : base(options)
+    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
     {
-    }
-
-    public async Task<IEnumerable<Guid>> GetAllSubtaskIdsRecursivelyAsync(Guid taskId, CancellationToken cancellationToken)
-    {
-        var allSubtaskIds = await Database.SqlQueryRaw<Guid>(
-            @$"with recursive cte (Id, RootTaskId) as (
-                select     Id, 
-                            RootTaskId 
-                from       todolist.Tasks 
-                where      RootTaskId = ""{taskId}""
-                union all
-                select     t.Id, 
-                            t.RootTaskId 
-                from       todolist.Tasks t 
-                inner join cte
-                        on t.RootTaskId = cte.Id 
-            ) 
-            select cte.Id from cte;"
-        ).ToListAsync(cancellationToken);
-
-        return allSubtaskIds;
     }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

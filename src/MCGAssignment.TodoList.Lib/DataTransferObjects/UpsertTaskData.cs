@@ -1,6 +1,7 @@
 using System.Text.Json.Serialization;
+using MCGAssignment.TodoList.Lib.Enums;
 
-namespace MCGAssignment.TodoList.DataTransferObjects;
+namespace MCGAssignment.TodoList.Lib.DataTransferObjects;
 
 public record UpsertTaskData
 {
@@ -10,7 +11,7 @@ public record UpsertTaskData
     public TaskPriority Priority { get; init;}
 
     [JsonConverter(typeof(JsonStringEnumConverter))]
-    public TaskStatus Status { get; init; }
+    public Enums.TaskStatus Status { get; init; }
 
     public string? Description { get; init; }
     

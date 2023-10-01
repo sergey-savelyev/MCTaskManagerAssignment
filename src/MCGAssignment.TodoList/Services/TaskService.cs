@@ -1,6 +1,8 @@
 using System.Linq.Expressions;
-using MCGAssignment.TodoList.DataTransferObjects;
 using MCGAssignment.TodoList.Exceptions;
+using MCGAssignment.TodoList.Extensions;
+using MCGAssignment.TodoList.Lib.DataTransferObjects;
+using MCGAssignment.TodoList.Lib.Enums;
 using MCGAssignment.TodoList.Models;
 using MCGAssignment.TodoList.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -9,14 +11,13 @@ namespace MCGAssignment.TodoList.Services;
 
 public class TaskService : ITaskService
 {
-    private readonly TodoListContext _context;
-    private readonly ITaskActionLogger _actionLogger;
+    private readonly ApplicationDbContext _context;
+    private readonly ITaskActionLogService _logService;
 
-    public TaskService(TodoListContext context, ITaskActionLogger actionLogger)
+    public TaskService(ApplicationDbContext context, ITaskActionLogService logService)
     {
         _context = context;
-        _actionLogger = actionLogger;
-        _context = context;
+        _logService = logService;
     }
 
     public async Task DeleteTaskAsync(Guid taskId, CancellationToken cancellationToken)
@@ -25,7 +26,7 @@ public class TaskService : ITaskService
         _context.Tasks.Remove(entity ?? throw new EntityNotFoundException(taskId));
 
         await _context.SaveChangesAsync(cancellationToken);
-        await _actionLogger.LogDeleteAsync(taskId, cancellationToken);
+        await _logService.LogTaskActionAsync(TaskAction.Delete, taskId, null, cancellationToken);
     }
 
     public async Task<TaskViewFull> GetTaskAsync(Guid taskId, CancellationToken cancellationToken)
@@ -82,7 +83,7 @@ public class TaskService : ITaskService
 
         await _context.Tasks.AddAsync(newEntity, cancellationToken);
         await _context.SaveChangesAsync(cancellationToken);
-        await _actionLogger.LogCreateAsync(newEntity.Id, cancellationToken);
+        await _logService.LogTaskActionAsync(TaskAction.Create, newEntity.Id, null, cancellationToken);
 
         return newEntity.Id;
     }
@@ -103,7 +104,7 @@ public class TaskService : ITaskService
         entity.Status = updateData.Status;
 
         await _context.SaveChangesAsync(cancellationToken);
-        await _actionLogger.LogUpdateAsync(taskId, cancellationToken);
+        await _logService.LogTaskActionAsync(TaskAction.Update, taskId, entity, cancellationToken);
     }
 
     public async Task UpdateTaskRootAsync(Guid taskId, Guid? newRootId, CancellationToken cancellationToken)
@@ -122,7 +123,7 @@ public class TaskService : ITaskService
 
         if (newRootId is not null)
         {
-            var flatSubtaskIds = await _context.GetAllSubtaskIdsRecursivelyAsync(taskId, cancellationToken);
+            var flatSubtaskIds = await GetAllSubtaskIdsRecursivelyAsync(taskId, cancellationToken);
 
             if (flatSubtaskIds.Contains(newRootId.Value))
             {
@@ -133,7 +134,7 @@ public class TaskService : ITaskService
         entity.RootTaskId = newRootId;
         await _context.SaveChangesAsync(cancellationToken);
 
-        await _actionLogger.LogRootChangedAsync(taskId, newRootId, cancellationToken);
+        await _logService.LogTaskActionAsync(TaskAction.Update, taskId, new { RootId = newRootId }, cancellationToken);
     }
 
     public async Task<IEnumerable<TaskSearchView>> SearchTasksAsync(string keyPhrase, int take, int skip, CancellationToken cancellationToken)
@@ -152,6 +153,27 @@ public class TaskService : ITaskService
                 .ConfigureAwait(false);
 
         return entities;
+    }
+
+    private async Task<IEnumerable<Guid>> GetAllSubtaskIdsRecursivelyAsync(Guid taskId, CancellationToken cancellationToken)
+    {
+        var allSubtaskIds = await _context.Database.SqlQueryRaw<Guid>(
+            @$"with recursive cte (Id, RootTaskId) as (
+                select     Id, 
+                            RootTaskId 
+                from       todolist.Tasks 
+                where      RootTaskId = ""{taskId}""
+                union all
+                select     t.Id, 
+                            t.RootTaskId 
+                from       todolist.Tasks t 
+                inner join cte
+                        on t.RootTaskId = cte.Id 
+            ) 
+            select cte.Id from cte;"
+        ).ToListAsync(cancellationToken);
+
+        return allSubtaskIds;
     }
 
     private static Expression<Func<TaskEntity, object?>> ResolveOrderProperty(string propertyName) => propertyName switch

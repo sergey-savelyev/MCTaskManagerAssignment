@@ -1,6 +1,6 @@
-using System.Text.Json.Serialization;
+using MCGAssignment.TodoList.Lib.Enums;
 
-namespace MCGAssignment.TodoList.DataTransferObjects;
+namespace MCGAssignment.TodoList.Lib.DataTransferObjects;
 
 public record TaskViewBase
 {
@@ -8,11 +8,9 @@ public record TaskViewBase
 
     public required string Summary { get; init; }
 
-    [JsonConverter(typeof(JsonStringEnumConverter))]
     public TaskPriority Priority { get; init; }
 
-    [JsonConverter(typeof(JsonStringEnumConverter))]
-    public TaskStatus Status { get; init; }
+    public Enums.TaskStatus Status { get; init; }
 }
 
 public record TaskViewDetailed : TaskViewBase

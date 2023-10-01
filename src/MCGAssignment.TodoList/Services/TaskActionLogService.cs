@@ -1,5 +1,8 @@
 using System.Linq.Expressions;
-using MCGAssignment.TodoList.DataTransferObjects;
+using System.Text.Json;
+using MCGAssignment.TodoList.Extensions;
+using MCGAssignment.TodoList.Lib.DataTransferObjects;
+using MCGAssignment.TodoList.Lib.Enums;
 using MCGAssignment.TodoList.Models;
 using MCGAssignment.TodoList.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -8,39 +11,52 @@ namespace MCGAssignment.TodoList.Services;
 
 public class TaskActionLogService : ITaskActionLogService
 {
-    private readonly TodoListContext _context;
+    private readonly ApplicationDbContext _context;
 
-    public TaskActionLogService(TodoListContext context)
+    public TaskActionLogService(ApplicationDbContext context)
     {
         _context = context;
     }
 
+    public Task LogTaskActionAsync(TaskAction action, Guid? entityId, object? payload, CancellationToken cancellationToken)
+    {
+        var logEntry = new LogEntity
+        {
+            Id = Guid.NewGuid(),
+            Action = action,
+            EntityType = nameof(TaskEntity),
+            EntityId = entityId,
+            Payload = payload is not null ? JsonSerializer.Serialize(payload) : null,
+            TimestampMsec = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()
+        };
+
+        _context.Logs.Add(logEntry);
+
+        return _context.SaveChangesAsync(cancellationToken);
+    }
+
     public async Task<IEnumerable<LogEntryView>> GetTaskActionLogBatchAsync(int skip, int take, string orderBy, bool descending, CancellationToken cancellationToken)
     {
-        var entityType = typeof(TaskEntity).Name;
-        var orderByProperty = ResolveOrderProperty(orderBy);
-        var query = _context.Logs.Where(x => x.EntityType == entityType);
-        var queryOrdered = descending 
-            ? query.OrderByDescending(orderByProperty)
-            : query.OrderBy(orderByProperty);
-
-        var entities = queryOrdered.Skip(skip).Take(take);
-        var views = await entities.Select(x => x.ToView()).ToListAsync(cancellationToken);
+        var views = await _context.Logs
+            .Where(x => x.EntityType == nameof(TaskEntity))
+            .OrderBy(ResolveOrderProperty(orderBy), descending)
+            .Skip(skip)
+            .Take(take)
+            .Select(x => x.ToView())
+            .ToListAsync(cancellationToken);
 
         return views;
     }
 
     public async Task<IEnumerable<LogEntryView>> GetTaskActionLogBatchByTaskAsync(Guid taskId, int skip, int take, string orderBy, bool descending, CancellationToken cancellationToken)
     {
-        var orderByProperty = ResolveOrderProperty(orderBy);
-        var query = _context.Logs.Where(x => x.EntityId.HasValue && x.EntityId == taskId);
-        var queryOrdered = descending 
-            ? query.OrderByDescending(orderByProperty)
-            : query.OrderBy(orderByProperty);
-
-        var entities = queryOrdered.Skip(skip).Take(take);
-
-        var views = await entities.Select(x => x.ToView()).ToListAsync(cancellationToken);
+        var views = await _context.Logs
+            .Where(x => x.EntityId.HasValue && x.EntityId == taskId)
+            .OrderBy(ResolveOrderProperty(orderBy), descending)
+            .Skip(skip)
+            .Take(take)
+            .Select(x => x.ToView())
+            .ToListAsync(cancellationToken);
 
         return views;
     }

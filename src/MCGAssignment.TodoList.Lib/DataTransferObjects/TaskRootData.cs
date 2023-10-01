@@ -1,3 +1,3 @@
-namespace MCGAssignment.TodoList.DataTransferObjects;
+namespace MCGAssignment.TodoList.Lib.DataTransferObjects;
 
-public record TaskRootData(string? RootId);
+public record TaskRootData(Guid? RootId);

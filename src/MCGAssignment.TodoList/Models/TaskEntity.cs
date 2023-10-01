@@ -1,4 +1,4 @@
-using MCGAssignment.TodoList.DataTransferObjects;
+using MCGAssignment.TodoList.Lib.Enums;
 
 namespace MCGAssignment.TodoList.Models;
 
@@ -20,5 +20,5 @@ public class TaskEntity
 
     public TaskPriority Priority { get; set; }
 
-    public DataTransferObjects.TaskStatus Status { get; set; }
+    public Lib.Enums.TaskStatus Status { get; set; }
 }

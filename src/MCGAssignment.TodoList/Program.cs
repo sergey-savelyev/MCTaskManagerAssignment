@@ -22,19 +22,20 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddControllers();
 
 builder.Services.AddScoped<ITaskService, TaskService>();
-builder.Services.AddScoped<ITaskActionLogger, TaskActionLogger>();
 builder.Services.AddScoped<ITaskActionLogService, TaskActionLogService>();
 
-builder.Services.AddDbContext<TodoListContext>(options => 
+builder.Services.AddDbContext<ApplicationDbContext>(options => 
 {
     options.UseLazyLoadingProxies().UseMySQL(builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new Exception("Failed to initialize: connection string cannot be null"));
 });
 
 var app = builder.Build();
 
+// In normal life it's not the best practice: initializing the schema on startup. 
+// I'd rather do it via migrations and use special endpoint called by Azure Functions (or aws alternatives).
 using(var scope = app.Services.CreateScope())
 {
-    var dbContext = scope.ServiceProvider.GetRequiredService<TodoListContext>();
+    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
     dbContext.Database.EnsureCreated();
 }
 

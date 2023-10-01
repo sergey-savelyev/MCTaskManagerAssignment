@@ -1,6 +1,7 @@
-using MCGAssignment.TodoList.DataTransferObjects;
+using MCGAssignment.TodoList.Lib.DataTransferObjects;
+using MCGAssignment.TodoList.Models;
 
-namespace MCGAssignment.TodoList.Models;
+namespace MCGAssignment.TodoList.Extensions;
 
 public static class MappingExtensions
 {

@@ -1,10 +1,12 @@
+using MCGAssignment.TodoList.Lib.Enums;
+
 namespace MCGAssignment.TodoList.Models;
 
 public class LogEntity
 {
     public required Guid Id { get; init; }
 
-    public required string Action { get; init; }
+    public required TaskAction Action { get; init; }
 
     public long TimestampMsec { get; init; }
 

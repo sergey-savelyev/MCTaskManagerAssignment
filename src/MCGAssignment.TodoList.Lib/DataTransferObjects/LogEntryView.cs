@@ -1,3 +1,5 @@
-namespace MCGAssignment.TodoList.DataTransferObjects;
+using MCGAssignment.TodoList.Lib.Enums;
 
-public record LogEntryView(Guid Id, string Action, long TimestampMsec, Guid? EntityId, string EntityType, string? Payload);
+namespace MCGAssignment.TodoList.Lib.DataTransferObjects;
+
+public record LogEntryView(Guid Id, TaskAction Action, long TimestampMsec, Guid? EntityId, string EntityType, string? Payload);
