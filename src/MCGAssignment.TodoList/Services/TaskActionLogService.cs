@@ -61,6 +61,9 @@ public class TaskActionLogService : ITaskActionLogService
         return views;
     }
 
+    // I could use an expression tree here, but I don't really think it's worth it.
+    // Expression trees are quite hard to read, understand and debug.
+    // So if number of properties is small, I prefer to use old but gold switch-case.
     private static Expression<Func<LogEntity, object?>> ResolveOrderProperty(string propertyName) => propertyName switch
     {
         nameof(LogEntity.Id) => x => x.Id,

@@ -22,7 +22,7 @@ public class TaskService : ITaskService
 
     public async Task DeleteTaskAsync(Guid taskId, CancellationToken cancellationToken)
     {
-        var entity = await _context.Tasks.FindAsync(taskId, cancellationToken).ConfigureAwait(false);
+        var entity = await _context.Tasks.FindAsync(taskId, cancellationToken);
         _context.Tasks.Remove(entity ?? throw new EntityNotFoundException(taskId));
 
         await _context.SaveChangesAsync(cancellationToken);
@@ -61,7 +61,7 @@ public class TaskService : ITaskService
             : query.OrderBy(orderPropertyExpression);
 
         query = orderedQuery.Skip(skip).Take(take);
-        var entities = await query.ToListAsync(cancellationToken).ConfigureAwait(false);
+        var entities = await query.ToListAsync(cancellationToken);
 
         var taskDetails = entities.Select(x => x.ToDetailedView());
 
@@ -149,8 +149,7 @@ public class TaskService : ITaskService
                 .Skip(skip)
                 .Take(take)
                 .Select(x => new TaskSearchView(x.Id, x.Summary, x.Description))
-                .ToListAsync(cancellationToken)
-                .ConfigureAwait(false);
+                .ToListAsync(cancellationToken);
 
         return entities;
     }
@@ -176,6 +175,9 @@ public class TaskService : ITaskService
         return allSubtaskIds;
     }
 
+    // I could use an expression tree here, but I don't really think it's worth it.
+    // Expression trees are quite hard to read, understand and debug.
+    // So if number of properties is small, I prefer to use old but gold switch-case.
     private static Expression<Func<TaskEntity, object?>> ResolveOrderProperty(string propertyName) => propertyName switch
     {
         nameof(TaskEntity.Summary) => x => x.Summary,
