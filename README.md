@@ -1,6 +1,6 @@
 ## CHANGELOG
 
-#### 30/09/2023 Update:
+#### 01/10/2023 Update:
 - Namespaces improvements;
 - Task actions logging logic refactoring: redundand services removed;
 - Minor general refactoring and improvements;
