@@ -70,8 +70,13 @@ public class TasksRepository : ITasksRepository
         return subtaskEntities;
     }
 
-    public async Task<IEnumerable<TaskEntity>> GetRootTaskBatchAsync(int take, int skip, string sortBy, bool descending, CancellationToken cancellationToken)
+    public async Task<IEnumerable<TaskEntity>> GetRootTaskBatchAsync(int take, object continuationToken, string sortBy, bool descending, CancellationToken cancellationToken)
     {
+        if (int.TryParse(continuationToken?.ToString(), out var skip) is false)
+        {
+            skip = 0;
+        }
+
         var entities = await _context.Tasks
             .Where(x => x.RootTaskId == null)
             .OrderBy(ResolveOrderProperty(sortBy), descending)
@@ -83,8 +88,13 @@ public class TasksRepository : ITasksRepository
         return entities;
     }
 
-    public async Task<IEnumerable<TaskSearchEntity>> SearchTasksAsync(string keyPhrase, int take, int skip, CancellationToken cancellationToken)
+    public async Task<IEnumerable<TaskSearchEntity>> SearchTasksAsync(string keyPhrase, int take, object continuationToken, CancellationToken cancellationToken)
     {
+        if (int.TryParse(continuationToken?.ToString(), out var skip) is false)
+        {
+            skip = 0;
+        }
+
         keyPhrase = keyPhrase.Trim().ToLower();
         var entities = 
             await _context.Tasks

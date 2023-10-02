@@ -18,7 +18,7 @@ public class TaskLogsController : ControllerBase
     [HttpGet("tasks/{taskId}/logs")]
     public async Task<IActionResult> GetTaskLogs(
         [FromRoute] string taskId, CancellationToken cancellationToken, [FromQuery] int skip = 0,
-        [FromQuery] int take = 20, [FromQuery] string orderby = nameof(LogEntryView.TimestampMsec),
+        [FromQuery] int take = 20,
         bool descending = true)
     {
         if (!Guid.TryParse(taskId, out var taskIdGuid))
@@ -26,7 +26,7 @@ public class TaskLogsController : ControllerBase
             return BadRequest("Invalid task id");
         }
 
-        var logs = await _taskActionLogService.GetTaskActionLogBatchByTaskAsync(taskIdGuid, skip, take, orderby, descending, cancellationToken);
+        var logs = await _taskActionLogService.GetTaskActionLogBatchByTaskAsync(taskIdGuid, skip, take, descending, cancellationToken);
 
         return Ok(logs);
     }
@@ -34,10 +34,10 @@ public class TaskLogsController : ControllerBase
     [HttpGet("tasks/logs")]
     public async Task<IActionResult> GetAllLogs(
         CancellationToken cancellationToken, [FromQuery] int skip = 0,
-        [FromQuery] int take = 20, [FromQuery] string orderby = nameof(LogEntryView.TimestampMsec),
+        [FromQuery] int take = 20,
         bool descending = true)
     {
-        var logs = await _taskActionLogService.GetTaskActionLogBatchAsync(skip, take, orderby, descending, cancellationToken);
+        var logs = await _taskActionLogService.GetTaskActionLogBatchAsync(skip, take, descending, cancellationToken);
 
         return Ok(logs);
     }

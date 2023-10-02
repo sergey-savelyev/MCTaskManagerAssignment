@@ -4,7 +4,7 @@ namespace MCGAssignment.TodoList.Application.Services;
 
 public interface ITaskService
 {
-    Task<IEnumerable<TaskViewDetailed>> GetRootTaskBatchAsync(int take, int skip, string sortBy, bool descending, CancellationToken cancellationToken);
+    Task<IEnumerable<TaskViewDetailed>> GetRootTaskBatchAsync(int take, object continuationToken, string sortBy, bool descending, CancellationToken cancellationToken);
 
     Task<TaskViewFull> GetTaskAsync(Guid taskId, CancellationToken cancellationToken);
 
@@ -16,5 +16,5 @@ public interface ITaskService
 
     Task DeleteTaskAsync(Guid taskId, CancellationToken cancellationToken);
 
-    Task<IEnumerable<TaskSearchView>> SearchTasksAsync(string keyPhrase, int take, int skip, CancellationToken cancellationToken);
+    Task<IEnumerable<TaskSearchView>> SearchTasksAsync(string keyPhrase, int take, object continuationToken, CancellationToken cancellationToken);
 }

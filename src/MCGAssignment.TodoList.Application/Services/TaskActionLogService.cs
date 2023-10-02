@@ -31,16 +31,16 @@ public class TaskActionLogService : ITaskActionLogService
         await _repository.AddAsync(logEntry, cancellationToken);
     }
 
-    public async Task<IEnumerable<LogEntryView>> GetTaskActionLogBatchAsync(int skip, int take, string orderBy, bool descending, CancellationToken cancellationToken)
+    public async Task<IEnumerable<LogEntryView>> GetTaskActionLogBatchAsync(object continuationToken, int take, bool descending, CancellationToken cancellationToken)
     {
-        var entities = await _repository.GetLogBatchByEntityTypeAsync<TaskEntity>(skip, take, orderBy, descending, cancellationToken);
+        var entities = await _repository.GetLogBatchByEntityTypeAsync(nameof(TaskEntity), continuationToken, take, descending, cancellationToken);
 
         return entities.Select(x => x.ToView());
     }
 
-    public async Task<IEnumerable<LogEntryView>> GetTaskActionLogBatchByTaskAsync(Guid taskId, int skip, int take, string orderBy, bool descending, CancellationToken cancellationToken)
+    public async Task<IEnumerable<LogEntryView>> GetTaskActionLogBatchByTaskAsync(Guid taskId, object continuationToken, int take,bool descending, CancellationToken cancellationToken)
     {
-        var entities = await _repository.GetLogBatchByEntityAsync(taskId, skip, take, orderBy, descending, cancellationToken);
+        var entities = await _repository.GetLogBatchByEntityAsync(taskId, continuationToken, take, descending, cancellationToken);
 
         return entities.Select(x => x.ToView());
     }

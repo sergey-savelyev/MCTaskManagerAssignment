@@ -1,4 +1,3 @@
-using System.Linq.Expressions;
 using MCGAssignment.TodoList.Application.Exceptions;
 using MCGAssignment.TodoList.Application.Extensions;
 using MCGAssignment.TodoList.Application.DataTransferObjects;
@@ -41,9 +40,9 @@ public class TaskService : ITaskService
         return result;
     }
 
-    public async Task<IEnumerable<TaskViewDetailed>> GetRootTaskBatchAsync(int take, int skip, string sortBy, bool descending, CancellationToken cancellationToken)
+    public async Task<IEnumerable<TaskViewDetailed>> GetRootTaskBatchAsync(int take, object continuationToken, string sortBy, bool descending, CancellationToken cancellationToken)
     {
-        var entities = await _repository.GetRootTaskBatchAsync(take, skip, sortBy, descending, cancellationToken);
+        var entities = await _repository.GetRootTaskBatchAsync(take, continuationToken, sortBy, descending, cancellationToken);
         var taskDetails = entities.Select(x => x.ToDetailedView());
 
         return taskDetails;
@@ -105,9 +104,9 @@ public class TaskService : ITaskService
         await _logService.LogTaskActionAsync(TaskAction.RootChanged, taskId, new { RootId = newRootId }, cancellationToken);
     }
 
-    public async Task<IEnumerable<TaskSearchView>> SearchTasksAsync(string keyPhrase, int take, int skip, CancellationToken cancellationToken)
+    public async Task<IEnumerable<TaskSearchView>> SearchTasksAsync(string keyPhrase, int take, object continuationToken, CancellationToken cancellationToken)
     {
-        var searchResultEntities = await _repository.SearchTasksAsync(keyPhrase, take, skip, cancellationToken);
+        var searchResultEntities = await _repository.SearchTasksAsync(keyPhrase, take, continuationToken, cancellationToken);
 
         return searchResultEntities.Select(x => x.ToSearchView());
     }

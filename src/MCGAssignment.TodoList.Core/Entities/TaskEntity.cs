@@ -8,8 +8,6 @@ public class TaskEntity
 
     public Guid? RootTaskId { get; set; }
 
-    public virtual TaskEntity? RootTask { get; init; }
-
     public required string Summary { get; set; }
 
     public string? Description { get; set; }
@@ -20,5 +18,5 @@ public class TaskEntity
 
     public TaskPriority Priority { get; set; }
 
-    public Core.Enums.TaskStatus Status { get; set; }
+    public Enums.TaskStatus Status { get; set; }
 }
