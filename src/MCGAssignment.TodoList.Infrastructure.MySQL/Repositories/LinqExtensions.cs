@@ -1,6 +1,6 @@
 using System.Linq.Expressions;
 
-namespace MCGAssignment.TodoList.Application.Extensions;
+namespace MCGAssignment.TodoList.Infrastructure.MySQL.Repositories;
 
 public static class LinqExtensions
 {

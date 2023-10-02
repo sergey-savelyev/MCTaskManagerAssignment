@@ -1,5 +1,5 @@
-using MCGAssignment.TodoList.Lib.DataTransferObjects;
-using MCGAssignment.TodoList.Services;
+using MCGAssignment.TodoList.Application.DataTransferObjects;
+using MCGAssignment.TodoList.Application.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MCGAssignment.TodoList.Controllers;

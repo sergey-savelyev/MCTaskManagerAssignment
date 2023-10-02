@@ -14,6 +14,7 @@
 
   <ItemGroup>
     <ProjectReference Include="../MCGAssignment.TodoList.Application/MCGAssignment.TodoList.Application.csproj" />
+    <ProjectReference Include="../MCGAssignment.TodoList.Infrastructure.MySQL/MCGAssignment.TodoList.Infrastructure.MySQL.csproj" />
   </ItemGroup>
 
 </Project>

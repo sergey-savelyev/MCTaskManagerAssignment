@@ -111,17 +111,4 @@ public class TaskService : ITaskService
 
         return searchResultEntities.Select(x => x.ToSearchView());
     }
-
-    // I could use an expression tree here, but I don't really think it's worth it.
-    // Expression trees are quite hard to read, understand and debug.
-    // So if number of properties is small, I prefer to use old but gold switch-case.
-    private static Expression<Func<TaskEntity, object?>> ResolveOrderProperty(string propertyName) => propertyName switch
-    {
-        nameof(TaskEntity.Summary) => x => x.Summary,
-        nameof(TaskEntity.CreateDate) => x => x.CreateDate,
-        nameof(TaskEntity.DueDate) => x => x.DueDate,
-        nameof(TaskEntity.Priority) => x => x.Priority,
-        nameof(TaskEntity.Status) => x => x.Status,
-        _ => throw new ArgumentException("Unsupported order property")
-    };
 }

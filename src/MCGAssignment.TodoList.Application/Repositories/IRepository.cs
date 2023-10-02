@@ -8,5 +8,5 @@ public interface IRepository<TEntity>
 
     Task<TEntity> UpdateAsync(TEntity entity, CancellationToken cancellationToken);
 
-    Task<TEntity> DeleteAsync(Guid id, CancellationToken cancellationToken);
+    Task DeleteAsync(Guid id, CancellationToken cancellationToken);
 }
