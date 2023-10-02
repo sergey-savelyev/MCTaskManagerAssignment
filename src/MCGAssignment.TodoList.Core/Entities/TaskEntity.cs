@@ -1,6 +1,6 @@
-using MCGAssignment.TodoList.Lib.Enums;
+using MCGAssignment.TodoList.Core.Enums;
 
-namespace MCGAssignment.TodoList.Models;
+namespace MCGAssignment.TodoList.Core.Entities;
 
 public class TaskEntity
 {
@@ -20,5 +20,5 @@ public class TaskEntity
 
     public TaskPriority Priority { get; set; }
 
-    public Lib.Enums.TaskStatus Status { get; set; }
+    public Core.Enums.TaskStatus Status { get; set; }
 }

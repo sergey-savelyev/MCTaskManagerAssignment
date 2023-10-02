@@ -1,6 +1,6 @@
-using MCGAssignment.TodoList.Lib.Enums;
+using MCGAssignment.TodoList.Core.Enums;
 
-namespace MCGAssignment.TodoList.Models;
+namespace MCGAssignment.TodoList.Core.Entities;
 
 public class LogEntity
 {

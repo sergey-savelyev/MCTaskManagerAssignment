@@ -1,6 +1,6 @@
-using MCGAssignment.TodoList.Lib.DataTransferObjects;
+using MCGAssignment.TodoList.Application.DataTransferObjects;
 
-namespace MCGAssignment.TodoList.Services;
+namespace MCGAssignment.TodoList.Application.Services;
 
 public interface ITaskService
 {

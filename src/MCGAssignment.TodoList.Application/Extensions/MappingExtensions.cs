@@ -1,7 +1,7 @@
-using MCGAssignment.TodoList.Lib.DataTransferObjects;
-using MCGAssignment.TodoList.Models;
+using MCGAssignment.TodoList.Application.DataTransferObjects;
+using MCGAssignment.TodoList.Core.Entities;
 
-namespace MCGAssignment.TodoList.Extensions;
+namespace MCGAssignment.TodoList.Application.Extensions;
 
 public static class MappingExtensions
 {
@@ -40,4 +40,6 @@ public static class MappingExtensions
 
     public static LogEntryView ToView(this LogEntity entity) =>
         new LogEntryView(entity.Id, entity.Action, entity.TimestampMsec, entity.EntityId, entity.EntityType, entity.Payload);
+
+    public static TaskSearchView ToSearchView(this TaskSearchEntity entity) => new TaskSearchView(entity.Id, entity.Summary, entity.Description);
 }

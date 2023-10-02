@@ -1,7 +1,7 @@
-using MCGAssignment.TodoList.Lib.DataTransferObjects;
-using MCGAssignment.TodoList.Lib.Enums;
+using MCGAssignment.TodoList.Application.DataTransferObjects;
+using MCGAssignment.TodoList.Core.Enums;
 
-namespace MCGAssignment.TodoList.Services;
+namespace MCGAssignment.TodoList.Application.Services;
 
 public interface ITaskActionLogService
 {

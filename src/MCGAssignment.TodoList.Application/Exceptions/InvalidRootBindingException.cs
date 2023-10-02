@@ -1,4 +1,4 @@
-namespace MCGAssignment.TodoList.Exceptions;
+namespace MCGAssignment.TodoList.Application.Exceptions;
 
 public class InvalidRootBindingException : Exception
 {

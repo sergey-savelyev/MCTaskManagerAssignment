@@ -1,6 +1,6 @@
 using System.Linq.Expressions;
 
-namespace MCGAssignment.TodoList.Extensions;
+namespace MCGAssignment.TodoList.Application.Extensions;
 
 public static class LinqExtensions
 {
