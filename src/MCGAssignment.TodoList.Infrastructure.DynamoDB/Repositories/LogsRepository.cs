@@ -38,7 +38,7 @@ public class LogsRepository : ILogsRepository
         return document.ToLogEntity();
     }
 
-    public async Task<IEnumerable<LogEntity>> GetLogBatchByEntityAsync(Guid entityId, object continuationToken, int take, bool descending, CancellationToken cancellationToken)
+    public async Task<(IEnumerable<LogEntity> Entities, object ContinuationToken)> GetLogBatchByEntityAsync(Guid entityId, object continuationToken, int take, bool descending, CancellationToken cancellationToken)
     {
         var continuationTokenParsed = JsonSerializer.Deserialize<Dictionary<string, AttributeValue>>(continuationToken?.ToString() ?? "");
 
@@ -63,10 +63,10 @@ public class LogsRepository : ILogsRepository
         var response = await _dynamoDBClient.QueryAsync(queryRequest, cancellationToken);
         var entities = response.Items.Select(x => x.ToLogEntity());
 
-        return entities;
+        return (Entities: entities, ContinuationToken: response.LastEvaluatedKey);
     }
 
-    public async Task<IEnumerable<LogEntity>> GetLogBatchByEntityTypeAsync(string entityType, object continuationToken, int take, bool descending, CancellationToken cancellationToken)
+    public async Task<(IEnumerable<LogEntity> Entities, object ContinuationToken)> GetLogBatchByEntityTypeAsync(string entityType, object continuationToken, int take, bool descending, CancellationToken cancellationToken)
     {
         var continuationTokenParsed = JsonSerializer.Deserialize<Dictionary<string, AttributeValue>>(continuationToken?.ToString() ?? "");
 
@@ -91,7 +91,7 @@ public class LogsRepository : ILogsRepository
         var response = await _dynamoDBClient.QueryAsync(queryRequest, cancellationToken);
         var entities = response.Items.Select(x => x.ToLogEntity());
 
-        return entities;
+        return (Entities: entities, ContinuationToken: response.LastEvaluatedKey);
     }
 
     public Task<LogEntity> UpdateAsync(LogEntity entity, CancellationToken cancellationToken)

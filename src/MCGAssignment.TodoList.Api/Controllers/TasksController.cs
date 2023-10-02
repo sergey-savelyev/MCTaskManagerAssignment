@@ -1,9 +1,10 @@
+using MCGAssignment.TodoList.Api.ViewModels;
 using MCGAssignment.TodoList.Application.DataTransferObjects;
 using MCGAssignment.TodoList.Application.Exceptions;
 using MCGAssignment.TodoList.Application.Services;
 using Microsoft.AspNetCore.Mvc;
 
-namespace MCGAssignment.TodoList.Controllers;
+namespace MCGAssignment.TodoList.Api.Controllers;
 
 [Route("api/tasks")]
 [ApiController]
@@ -37,7 +38,7 @@ public class TasksController : ControllerBase
     {
         var result = await _taskService.SearchTasksAsync(phrase, take, skip, cancellationToken);
 
-        return Ok(result.ToList());
+        return Ok(new TaskSearchResponse { Entities = result.Entities.ToList(), ContinuationToken = result.ContinuationToken });
     }
 
     [HttpGet]
@@ -46,13 +47,13 @@ public class TasksController : ControllerBase
                                                        [FromQuery] string sortBy = nameof(TaskViewFull.CreateDate),
                                                        [FromQuery] bool descendingSort = false)
     {
-        var tasks = await _taskService.GetRootTaskBatchAsync(take, skip, sortBy, descendingSort, cancellationToken);
+        var result = await _taskService.GetRootTaskBatchAsync(take, skip, sortBy, descendingSort, cancellationToken);
         
-        return Ok(tasks.ToList());
+        return Ok(new TaskResponse { Entities = result.Entities.ToList(), ContinuationToken = result.ContinuationToken });
     }
 
     [HttpPost]
-    public async Task<IActionResult> CreateTaskAsync([FromBody] UpsertTaskData taskData, CancellationToken cancellationToken)
+    public async Task<IActionResult> CreateTaskAsync([FromBody] UpsertTaskDto taskData, CancellationToken cancellationToken)
     {
         var taskId = await _taskService.CreateTaskAsync(taskData, cancellationToken);
 
@@ -61,7 +62,7 @@ public class TasksController : ControllerBase
 
 
     [HttpPatch("{taskId}")]
-    public async Task<IActionResult> UpdateTaskAsync([FromRoute] Guid taskId, [FromBody] UpsertTaskData taskData, CancellationToken cancellationToken)
+    public async Task<IActionResult> UpdateTaskAsync([FromRoute] Guid taskId, [FromBody] UpsertTaskDto taskData, CancellationToken cancellationToken)
     {
         try
         {

@@ -70,7 +70,7 @@ public class TasksRepository : ITasksRepository
         return subtaskEntities;
     }
 
-    public async Task<IEnumerable<TaskEntity>> GetRootTaskBatchAsync(int take, object continuationToken, string sortBy, bool descending, CancellationToken cancellationToken)
+    public async Task<(IEnumerable<TaskEntity> Entities, object ContinuationToken)> GetRootTaskBatchAsync(int take, object continuationToken, string sortBy, bool descending, CancellationToken cancellationToken)
     {
         if (int.TryParse(continuationToken?.ToString(), out var skip) is false)
         {
@@ -84,11 +84,16 @@ public class TasksRepository : ITasksRepository
             .Take(take)
             .ToListAsync(cancellationToken);
 
+        int newContinuationToken = 0;
+        if (entities.Count == take)
+        {
+            newContinuationToken = skip + take;
+        }
 
-        return entities;
+        return (Entities: entities, ContinuationToken: newContinuationToken);
     }
 
-    public async Task<IEnumerable<TaskSearchEntity>> SearchTasksAsync(string keyPhrase, int take, object continuationToken, CancellationToken cancellationToken)
+    public async Task<(IEnumerable<TaskSearchEntity> Entities, object ContinuationToken)> SearchTasksAsync(string keyPhrase, int take, object continuationToken, CancellationToken cancellationToken)
     {
         if (int.TryParse(continuationToken?.ToString(), out var skip) is false)
         {
@@ -107,7 +112,13 @@ public class TasksRepository : ITasksRepository
                 .Select(x => new TaskSearchEntity(x.Id, x.Summary, x.Description))
                 .ToListAsync(cancellationToken);
 
-        return entities;
+        int newContinuationToken = 0;
+        if (entities.Count == take)
+        {
+            newContinuationToken = skip + take;
+        }
+
+        return (Entities: entities, ContinuationToken: newContinuationToken);
     }
 
     public async Task<IEnumerable<Guid>> GetAllSubtaskIdsRecursivelyAsync(Guid taskId, CancellationToken cancellationToken)

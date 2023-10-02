@@ -1,8 +1,7 @@
-using MCGAssignment.TodoList.Application.DataTransferObjects;
 using MCGAssignment.TodoList.Application.Services;
 using Microsoft.AspNetCore.Mvc;
 
-namespace MCGAssignment.TodoList.Controllers;
+namespace MCGAssignment.TodoList.Api.Controllers;
 
 [Route("api")]
 [ApiController]

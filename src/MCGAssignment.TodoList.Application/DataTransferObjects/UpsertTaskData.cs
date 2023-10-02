@@ -3,7 +3,7 @@ using MCGAssignment.TodoList.Core.Enums;
 
 namespace MCGAssignment.TodoList.Application.DataTransferObjects;
 
-public record UpsertTaskData
+public record UpsertTaskDto
 {
     public required string Summary { get; init; }
 

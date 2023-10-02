@@ -69,7 +69,7 @@ public class TasksRepository : ITasksRepository
         return entity ?? throw new EntityNotFoundException(id);
     }
 
-    public async Task<IEnumerable<TaskEntity>> GetRootTaskBatchAsync(int take, object continuationToken, string sortBy, bool descending, CancellationToken cancellationToken)
+    public async Task<(IEnumerable<TaskEntity> Entities, object ContinuationToken)> GetRootTaskBatchAsync(int take, object continuationToken, string sortBy, bool descending, CancellationToken cancellationToken)
     {
         var continuationTokenParsed = JsonSerializer.Deserialize<Dictionary<string, AttributeValue>>(continuationToken?.ToString() ?? "");
         var sortIndexName = sortBy switch
@@ -100,10 +100,10 @@ public class TasksRepository : ITasksRepository
             queryRequest.ExclusiveStartKey = continuationTokenParsed;
         }
 
-        var documents = await _dynamoDBClient.QueryAsync(queryRequest, cancellationToken);
-        var entities = documents.Items.Select(x => x.ToTaskEntity());
+        var response = await _dynamoDBClient.QueryAsync(queryRequest, cancellationToken);
+        var entities = response.Items.Select(x => x.ToTaskEntity());
 
-        return entities;
+        return (entities, response.LastEvaluatedKey);
     }
 
     public async Task<IEnumerable<TaskEntity>> GetSubTasksAsync(Guid taskId, CancellationToken cancellationToken)
@@ -124,10 +124,10 @@ public class TasksRepository : ITasksRepository
         return entities;
     }
 
-    public async Task<IEnumerable<TaskSearchEntity>> SearchTasksAsync(string keyPhrase, int take, object continuationToken, CancellationToken cancellationToken)
+    public async Task<(IEnumerable<TaskSearchEntity> Entities, object ContinuationToken)> SearchTasksAsync(string keyPhrase, int take, object continuationToken, CancellationToken cancellationToken)
     {
         var continuationTokenParsed = JsonSerializer.Deserialize<Dictionary<string, AttributeValue>>(continuationToken?.ToString() ?? "");
-        
+
         QueryRequest queryRequest = new QueryRequest
         {
             TableName = Constants.TasksTableName,
@@ -147,10 +147,10 @@ public class TasksRepository : ITasksRepository
             queryRequest.ExclusiveStartKey = continuationTokenParsed;
         }
 
-        var documents = await _dynamoDBClient.QueryAsync(queryRequest, cancellationToken);
-        var entities = documents.Items.Select(x => x.ToTaskSearchEntity());
+        var response = await _dynamoDBClient.QueryAsync(queryRequest, cancellationToken);
+        var entities = response.Items.Select(x => x.ToTaskSearchEntity());
 
-        return entities;
+        return (entities, response.LastEvaluatedKey);
     }
 
     public async Task<TaskEntity> UpdateAsync(TaskEntity entity, CancellationToken cancellationToken)

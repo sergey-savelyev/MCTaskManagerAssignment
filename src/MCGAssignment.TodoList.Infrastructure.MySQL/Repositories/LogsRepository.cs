@@ -55,7 +55,7 @@ public class LogsRepository : ILogsRepository
         await _context.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task<IEnumerable<LogEntity>> GetLogBatchByEntityTypeAsync(string entityType, object continuationToken, int take, bool descending, CancellationToken cancellationToken)
+    public async Task<(IEnumerable<LogEntity> Entities, object ContinuationToken)> GetLogBatchByEntityTypeAsync(string entityType, object continuationToken, int take, bool descending, CancellationToken cancellationToken)
     {
         if (int.TryParse(continuationToken?.ToString(), out var skip) is false)
         {
@@ -69,10 +69,16 @@ public class LogsRepository : ILogsRepository
             .Take(take)
             .ToListAsync(cancellationToken);
 
-        return entities;
+        int newContinuationToken = 0;
+        if (entities.Count == take)
+        {
+            newContinuationToken = skip + take;
+        }
+
+        return (entities, newContinuationToken);
     }
 
-    public async Task<IEnumerable<LogEntity>> GetLogBatchByEntityAsync(Guid entityId, object continuationToken, int take, bool descending, CancellationToken cancellationToken)
+    public async Task<(IEnumerable<LogEntity> Entities, object ContinuationToken)> GetLogBatchByEntityAsync(Guid entityId, object continuationToken, int take, bool descending, CancellationToken cancellationToken)
     {
         if (int.TryParse(continuationToken?.ToString(), out var skip) is false)
         {
@@ -86,6 +92,12 @@ public class LogsRepository : ILogsRepository
             .Take(take)
             .ToListAsync(cancellationToken);
 
-        return entities;
+        int newContinuationToken = 0;
+        if (entities.Count == take)
+        {
+            newContinuationToken = skip + take;
+        }
+
+        return (entities, newContinuationToken);
     }
 }
