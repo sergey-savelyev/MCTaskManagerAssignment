@@ -31,7 +31,7 @@ services:
     image: mcgassignmenttodolist
     build:
       context: .
-      dockerfile: src/MCGAssignment.TodoList/Dockerfile
+      dockerfile: src/MCGAssignment.TodoList.Api/Dockerfile
     ports:
       - 5006:5006
   mcgassignmenttodolist-client:
