@@ -8,6 +8,8 @@ public class TaskEntity
 
     public Guid? RootTaskId { get; set; }
 
+    public virtual TaskEntity? RootTask { get; set; }
+
     public required string Summary { get; set; }
 
     public string? Description { get; set; }

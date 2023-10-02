@@ -1,5 +1,6 @@
 using System.Text.Json;
 using Amazon.DynamoDBv2;
+using Amazon.DynamoDBv2.DataModel;
 using Amazon.DynamoDBv2.DocumentModel;
 using Amazon.DynamoDBv2.Model;
 using MCGAssignment.TodoList.Application.Exceptions;
@@ -64,9 +65,16 @@ public class TasksRepository : ITasksRepository
         };
 
         var documents = await _dynamoDBClient.QueryAsync(queryRequest, cancellationToken);
-        var entity = documents.Items.Select(x => x.ToTaskEntity()).FirstOrDefault();
+        var entity = documents.Items.Select(x => x.ToTaskEntity()).FirstOrDefault() ?? throw new EntityNotFoundException(id);
 
-        return entity ?? throw new EntityNotFoundException(id);
+        // Not the best way to do this, costs 2 RCU, need to reconsider in future
+        if (entity.RootTaskId is not null)
+        {
+            using var context = new DynamoDBContext(_dynamoDBClient);
+            entity.RootTask = await context.LoadAsync<TaskEntity>(entity.RootTaskId, entity.Id, cancellationToken);
+        }
+
+        return entity;
     }
 
     public async Task<(IEnumerable<TaskEntity> Entities, object ContinuationToken)> GetRootTaskBatchAsync(int take, object continuationToken, string sortBy, bool descending, CancellationToken cancellationToken)

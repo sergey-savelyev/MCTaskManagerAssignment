@@ -33,7 +33,7 @@ public class ApplicationDbContext : DbContext
             entity.HasIndex(e => e.Summary).IsFullText();
             entity.HasIndex(e => e.Description).IsFullText();
 
-            entity.HasOne(e => e)
+            entity.HasOne(e => e.RootTask)
                 .WithOne()
                 .HasForeignKey<TaskEntity>(e => e.RootTaskId)
                 .OnDelete(DeleteBehavior.SetNull);

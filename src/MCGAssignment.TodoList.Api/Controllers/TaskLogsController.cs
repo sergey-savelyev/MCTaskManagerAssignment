@@ -1,3 +1,4 @@
+using MCGAssignment.TodoList.Api.ViewModels;
 using MCGAssignment.TodoList.Application.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -27,7 +28,7 @@ public class TaskLogsController : ControllerBase
 
         var logs = await _taskActionLogService.GetTaskActionLogBatchByTaskAsync(taskIdGuid, skip, take, descending, cancellationToken);
 
-        return Ok(logs);
+        return Ok(new LogResponse { Entities = logs.Entities.ToList(), ContinuationToken = logs.ContinuationToken });
     }
 
     [HttpGet("tasks/logs")]
@@ -38,6 +39,6 @@ public class TaskLogsController : ControllerBase
     {
         var logs = await _taskActionLogService.GetTaskActionLogBatchAsync(skip, take, descending, cancellationToken);
 
-        return Ok(logs);
+        return Ok(new LogResponse { Entities = logs.Entities.ToList(), ContinuationToken = logs.ContinuationToken });
     }
 }

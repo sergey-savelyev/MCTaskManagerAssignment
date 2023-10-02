@@ -1,3 +1,4 @@
+using MCGAssignment.TodoList.Application.Repositories;
 using MCGAssignment.TodoList.Application.Services;
 using MCGAssignment.TodoList.Infrastructure.MySQL.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -17,6 +18,9 @@ public static class StartupExtensions
         {
             options.UseLazyLoadingProxies().UseMySQL(configuration.GetConnectionString("DefaultConnection") ?? throw new Exception("Failed to initialize: connection string cannot be null"));
         });
+
+        services.AddScoped<ITasksRepository, TasksRepository>();
+        services.AddScoped<ILogsRepository, LogsRepository>();
 
         return services;
     }

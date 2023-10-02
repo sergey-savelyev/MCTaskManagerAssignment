@@ -44,11 +44,11 @@ public class TasksRepository : ITasksRepository
             throw new EntityNotFoundException(entity.Id);
         }
 
-        entity.Summary = entityToUpdate.Summary;
-        entity.Description = entityToUpdate.Description;
-        entity.DueDate = entityToUpdate.DueDate;
-        entity.Priority = entityToUpdate.Priority;
-        entity.Status = entityToUpdate.Status;
+        entityToUpdate.Summary = entity.Summary;
+        entityToUpdate.Description = entity.Description;
+        entityToUpdate.DueDate = entity.DueDate;
+        entityToUpdate.Priority = entity.Priority;
+        entityToUpdate.Status = entity.Status;
 
         await _context.SaveChangesAsync(cancellationToken);
         

@@ -11,4 +11,6 @@ namespace MCGAssignment.TodoList.Api.ViewModels
     public record TaskSearchResponse : BatchResponse<TaskSearchView> { }
 
     public record TaskResponse : BatchResponse<TaskViewDetailed> { }
+
+    public record LogResponse : BatchResponse<LogEntryView> { }
 }

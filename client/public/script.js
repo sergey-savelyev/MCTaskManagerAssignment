@@ -36,20 +36,20 @@ function reloadTasks(orderBy, desc) {
   order.orderBy = orderBy;
   $('#loadMoreTasksBtnContainer').show();
   $('#taskTable tbody').empty();
-  tasksSkipValue = 0;
+  tasksSkipValue = null;
   loadTasks(orderBy, desc);
 }
 
 function loadTasks(orderBy, desc) {
     $.ajax({
-        url: `http://localhost:5006/api/tasks?take=${tasksTakeValue}&skip=${tasksSkipValue}&orderBy=${orderBy ? orderBy : order.orderBy}${desc ? '&descendingSort=' + order.desc : ''}`,
+        url: `http://localhost:5006/api/tasks?take=${tasksTakeValue}${tasksSkipValue ? '&continuationToken=' + tasksSkipValue : ''}&orderBy=${orderBy ? orderBy : order.orderBy}${desc ? '&descendingSort=' + order.desc : ''}`,
         method: 'GET',
         success: function(data) {
             if (data.length < tasksTakeValue) {
                 $('#loadMoreTasksBtnContainer').hide();
             }
 
-            data.forEach(function(task) {
+            data.entities.forEach(function(task) {
                 $('#taskTable tbody').append(`
                 <tr>
                     <td style="display: none;">${task.id}</td>
@@ -67,7 +67,7 @@ function loadTasks(orderBy, desc) {
                 `);
             });
 
-            tasksSkipValue += data.length;
+            tasksSkipValue = data.continuationToken;
         },
             error: function() {
             console.error(`Can't fetch tasks from server`);
@@ -79,20 +79,20 @@ function reloadLogs() {
   $('#loadMoreLogsBtnContainer').show();
 
   $('#logsTable tbody').empty();
-  logsSkipValue = 0;
+  logsSkipValue = null;
   loadLogs();
 }
 
 function loadLogs() {
   $.ajax({
-      url: `http://localhost:5006/api/tasks/logs?take=${logsTakeValue}&skip=${logsSkipValue}`,
+      url: `http://localhost:5006/api/tasks/logs?take=${logsTakeValue}${logsSkipValue ? '&continuationToken=' + logsSkipValue : ''}`,
       method: 'GET',
       success: function(data) {
-          if (data.length < logsTakeValue) {
+          if (data.entities.length < logsTakeValue) {
               $('#loadMoreLogsBtnContainer').hide();
           }
 
-          data.forEach(function(log) {
+          data.entities.forEach(function(log) {
               $('#logsTable tbody').append(`
               <tr>
                   <td style="display: none;">${log.id}</td>
@@ -105,7 +105,7 @@ function loadLogs() {
               `);
           });
 
-          logsSkipValue += data.length;
+          logsSkipValue = data.continuationToken;
       },
           error: function() {
           console.error(`Can't fetch tasks from server`);
@@ -271,7 +271,7 @@ $('#searchPhrase').on('input', function() {
 function performSearch(phrase) {
   API.getSearchResults(phrase)
     .done(function(data) {
-      updateSearchResults(data);
+      updateSearchResults(data.entities);
     })
     .fail(function(error) {
       console.error('Search error', error);
@@ -440,7 +440,7 @@ const API = {
   },
   getSearchResults: function(phrase) {
     return $.ajax({
-      url: `http://localhost:5006/api/tasks/search/${phrase}?skip=0&take=10`,
+      url: `http://localhost:5006/api/tasks/search/${phrase}?continuationToken=0&take=10`,
       method: 'GET'
     });
   },
