@@ -1,3 +1,9 @@
+## IN PROGRESS
+
+**I'm currently migrating to a clean architecture and optional DynamoDB storage implementation.**
+
+Stay tuned!
+
 ## CHANGELOG
 
 #### 01/10/2023 Update:
