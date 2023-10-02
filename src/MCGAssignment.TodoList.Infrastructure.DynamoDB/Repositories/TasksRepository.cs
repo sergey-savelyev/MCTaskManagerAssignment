@@ -11,20 +11,12 @@ namespace MCGAssignment.TodoList.Infrastructure.DynamoDB.Repositories;
 
 public class TasksRepository : ITasksRepository
 {
-    private const string TableName = "Tasks";
-    private const string GlobalIdIndexName = "G_IdIndex";
-    private const string LocalSummaryIndexName = "L_SummaryIndex";
-    private const string LocalCreateDateIndexName = "L_CreateDateIndex";
-    private const string LocalDueDateIndexName = "L_DueDateIndex";
-    private const string LocalPriorityIndexName = "L_PriorityIndex";
-    private const string LocalStatusIndexName = "L_StatusIndex";
-
     private readonly Table _table;
     private readonly IAmazonDynamoDB _dynamoDBClient;
 
     public TasksRepository(IAmazonDynamoDB dynamoDBClient)
     {
-        _table = Table.LoadTable(dynamoDBClient, TableName);
+        _table = Table.LoadTable(dynamoDBClient, Constants.TasksTableName);
         _dynamoDBClient = dynamoDBClient;
     }
 
@@ -61,8 +53,8 @@ public class TasksRepository : ITasksRepository
     {
         QueryRequest queryRequest = new QueryRequest
         {
-            TableName = TableName,
-            IndexName = GlobalIdIndexName,
+            TableName = Constants.TasksTableName,
+            IndexName = Constants.TasksGlobalIdIndexName,
             KeyConditionExpression = "Id = :id",
             ExpressionAttributeValues = new Dictionary<string, AttributeValue>
             {
@@ -82,17 +74,17 @@ public class TasksRepository : ITasksRepository
         var continuationTokenParsed = JsonSerializer.Deserialize<Dictionary<string, AttributeValue>>(continuationToken?.ToString() ?? "");
         var sortIndexName = sortBy switch
         {
-            "Summary" => LocalSummaryIndexName,
-            "CreateDate" => LocalCreateDateIndexName,
-            "DueDate" => LocalDueDateIndexName,
-            "Priority" => LocalPriorityIndexName,
-            "Status" => LocalStatusIndexName,
+            "Summary" => Constants.TasksLocalSummaryIndexName,
+            "CreateDate" => Constants.TasksLocalCreateDateIndexName,
+            "DueDate" => Constants.TasksLocalDueDateIndexName,
+            "Priority" => Constants.TasksLocalPriorityIndexName,
+            "Status" => Constants.TasksLocalStatusIndexName,
             _ => throw new ArgumentException($"Invalid sort by value: {sortBy}")
         };
         
         QueryRequest queryRequest = new QueryRequest
         {
-            TableName = TableName,
+            TableName = Constants.TasksTableName,
             IndexName = sortIndexName,
             KeyConditionExpression = "RootTaskId = :rootTaskId",
             ExpressionAttributeValues = new Dictionary<string, AttributeValue>
@@ -118,7 +110,7 @@ public class TasksRepository : ITasksRepository
     {
         QueryRequest queryRequest = new QueryRequest
         {
-            TableName = TableName,
+            TableName = Constants.TasksTableName,
             KeyConditionExpression = "RootTaskId = :rootTaskId",
             ExpressionAttributeValues = new Dictionary<string, AttributeValue>
             {
@@ -138,8 +130,8 @@ public class TasksRepository : ITasksRepository
         
         QueryRequest queryRequest = new QueryRequest
         {
-            TableName = TableName,
-            IndexName = LocalSummaryIndexName,
+            TableName = Constants.TasksTableName,
+            IndexName = Constants.TasksLocalSummaryIndexName,
             KeyConditionExpression = "RootTaskId = :rootTaskId and contains(Summary, :keyPhrase)",
             ExpressionAttributeValues = new Dictionary<string, AttributeValue>
             {
@@ -195,7 +187,7 @@ public class TasksRepository : ITasksRepository
     {
         QueryRequest queryRequest = new QueryRequest
         {
-            TableName = TableName,
+            TableName = Constants.TasksTableName,
             KeyConditionExpression = "RootTaskId = :rootTaskId",
             ExpressionAttributeValues = new Dictionary<string, AttributeValue>
             {

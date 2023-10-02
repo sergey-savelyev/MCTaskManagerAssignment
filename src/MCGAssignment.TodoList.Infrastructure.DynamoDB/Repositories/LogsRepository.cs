@@ -10,16 +10,12 @@ namespace MCGAssignment.TodoList.Infrastructure.DynamoDB.Repositories;
 
 public class LogsRepository : ILogsRepository
 {
-    private const string TableName = "Logs";
-    private const string EntityIdIndexName = "EntityIdIndex";
-    private const string EntityTypeNameIndexName = "EntityTypeNameIndex";
-
     private readonly Table _table;
     private readonly IAmazonDynamoDB _dynamoDBClient;
 
     public LogsRepository(IAmazonDynamoDB dynamoDBClient)
     {
-        _table = Table.LoadTable(dynamoDBClient, TableName);
+        _table = Table.LoadTable(dynamoDBClient, Constants.LogsTableName);
         _dynamoDBClient = dynamoDBClient;
     }
 
@@ -48,8 +44,8 @@ public class LogsRepository : ILogsRepository
 
         QueryRequest queryRequest = new QueryRequest
         {
-            TableName = TableName,
-            IndexName = EntityIdIndexName,
+            TableName = Constants.LogsTableName,
+            IndexName = Constants.LogsGlobalEntityIdIndexName,
             ScanIndexForward = !descending,
             KeyConditionExpression = "EntityId = :entityId",
             ExpressionAttributeValues = new Dictionary<string, AttributeValue>
@@ -76,8 +72,8 @@ public class LogsRepository : ILogsRepository
 
         QueryRequest queryRequest = new QueryRequest
         {
-            TableName = TableName,
-            IndexName = EntityTypeNameIndexName,
+            TableName = Constants.LogsTableName,
+            IndexName = Constants.LogsGlobalEntityTypeNameIndexName,
             ScanIndexForward = !descending,
             KeyConditionExpression = "EntityType = :entityType",
             ExpressionAttributeValues = new Dictionary<string, AttributeValue>

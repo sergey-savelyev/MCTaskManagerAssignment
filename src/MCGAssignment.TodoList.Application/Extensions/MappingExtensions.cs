@@ -34,7 +34,6 @@ public static class MappingExtensions
         Description = entity.Description,
         CreateDate = entity.CreateDate,
         DueDate = entity.DueDate,
-        RootTask = entity.RootTask?.ToBaseView(),
         Subtasks = subtasks.ToList()
     };
 
