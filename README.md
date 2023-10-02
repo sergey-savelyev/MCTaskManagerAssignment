@@ -42,26 +42,6 @@ After the deployment is complete and all three containers are running, go to `lo
 - The application will not allow you to create a loop in the chain by assigning one of the sub-tasks as a parent to it's root task. You can navigate through the task chain by clicking on the root tasks in the upper part of the modal window or on the sub-tasks in the lower part.
 - Please note that the list displays **ONLY top-level** tasks that have **no root tasks**. You can sort the list by clicking on the column headers.
 
-## Technical Details
-
-### Challenges I encountered:
-
-1. **Choosing a database:**
-   The data structure for such a task is quite obvious and comes to mind from the very first minutes. We need a collection of entities organized as a singly linked list. Each task should store a reference to its parent task (if any). Parent tasks, however, know nothing about their subtasks.
-   Initially, Amazon DynamoDB seemed like a good choice for this, and I even started implementing it on this database. But then, I came across a moment.
-
-2. **Sorting:**
-   There's a sorting by task fields requirement in the assignment specifications. In general, there are 2 approaches. The bad one: We could load all tasks from db and sort them in the memory, providing the result. Extremely unefficient and not scalable. Clearly, data should be sorted on the database side. And here is where Amazon DynamoDB starts to pose difficulties. Initially designed for fast and specific read-write operations, this database doesn't work very well with aggregation and sorting. To ensure sorting by all other fields, I had to create the maximum allowable number of local indexes or several global ones. For such an application and functionality, these maneuvers seemed like overkill. It was decided to return to tried-and-true technologies: time-tested MySQL. Let it, on average, work a bit slower and bear the costs in the form of scoped services instead of familiar singletons; for this task, it seems to be the most suitable option.
-
-3. **Fighting task looping:**
-   Initially, it was clear that making task a parent and a child for the same task was a bad idea. When binding tasks between each other, what we needed was to gracefully "untangle" the chain when creating a new link and ensure that the potential parent is not already our subtask. Moreover, this needed to be done without resorting to multiple requests through recursion. You never know how many gazillions of tasks could end up in one chain; users can be quite inventive! I solved the problem by moving the recursive traversal through the chain to the database side, using Recursive Common Table Expressions (CTE). Fast and efficient!
-
-4. **Indexing:**
-   To facilitate convenient task search, I applied full-text indexes to the "summary" and "description" fields.
-
-5. **Frontend:**
-   It's always a challenge for a backend developer!
-
 ### API Overview
 
 The Task API allows users to manage tasks and perform various operations related to tasks.
