@@ -1,6 +1,6 @@
 ## IN PROGRESS
 
-**Curently working on some optimizations and bringing dynamodb to a stable state**
+**Curently working on some optimizations and bringing dynamodb to a stable state: batching some requests and reconsidering the schema**
 
 Stay tuned!
 
