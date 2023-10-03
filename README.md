@@ -1,10 +1,16 @@
 ## IN PROGRESS
 
-**I'm currently migrating to a clean architecture and optional DynamoDB storage implementation.**
+**Curently working on some optimizations and bringing dynamodb to a stable state**
 
 Stay tuned!
 
 ## CHANGELOG
+
+#### 03/10/2023 Update:
+- Full DynamoDB support implemented. Required some optimizations though
+
+#### 02/10/2023 Update:
+- Significant architecture improvements according to the covenants of Clean Architecture
 
 #### 01/10/2023 Update:
 - Namespaces improvements;
@@ -28,7 +34,19 @@ The task was to create a task manager, in other words, a to-do list. The user sh
 
 ## Running the Application
 
-To run the application on your machine, you'll need Docker installed. Clone the repository, navigate to it's root directory, and run the command `docker compose up --build`. The deployment will take some time—just enough to make yourself a cup of coffee!
+To run the application on your machine, you'll need Docker installed. First, clone the repository, navigate to it's root directory. 
+
+The app supports both build with MySQL and build with DynamoDB.
+
+### Running MySQL build
+
+`docker compose up --build`
+
+### Running DynamoDB build
+
+`docker compose -f docker-compose.dynamodb.yml up --build`
+
+### Make yourself a cup of coffee or tea! You're awesome!
 
 After the deployment is complete and all three containers are running, go to `localhost:3939` in your browser. This will take you to the main screen of the application.
 
