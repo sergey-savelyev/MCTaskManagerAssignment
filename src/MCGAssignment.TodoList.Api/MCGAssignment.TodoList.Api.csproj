@@ -5,16 +5,18 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <INFRA_DB_TYPE>DynamoDB</INFRA_DB_TYPE>
   </PropertyGroup>
+    
 
-  <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="7.0.11" />
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
-  </ItemGroup>
+    <ItemGroup>
+      <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="7.0.11" />
+      <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
+    </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="../MCGAssignment.TodoList.Application/MCGAssignment.TodoList.Application.csproj" />
-    <ProjectReference Include="../MCGAssignment.TodoList.Infrastructure.MySQL/MCGAssignment.TodoList.Infrastructure.MySQL.csproj" />
-  </ItemGroup>
+    <ItemGroup>
+      <ProjectReference Include="../MCGAssignment.TodoList.Application/MCGAssignment.TodoList.Application.csproj" />
+      <ProjectReference Include="../MCGAssignment.TodoList.Infrastructure.$(INFRA_DB_TYPE)/MCGAssignment.TodoList.Infrastructure.$(INFRA_DB_TYPE).csproj" />
+    </ItemGroup>
 
-</Project>
+  </Project>

@@ -1,6 +1,4 @@
-using System.Text.Json;
 using Amazon.DynamoDBv2;
-using Amazon.DynamoDBv2.DataModel;
 using Amazon.DynamoDBv2.DocumentModel;
 using Amazon.DynamoDBv2.Model;
 using MCGAssignment.TodoList.Application.Exceptions;
@@ -30,7 +28,19 @@ public class TasksRepository : ITasksRepository
 
     public async Task DeleteAsync(Guid id, CancellationToken cancellationToken)
     {
-        await _table.DeleteItemAsync(id, cancellationToken);
+        var item = await GetByIdIndexAsync(id, cancellationToken);
+        if (item is null)
+        {
+            throw new EntityNotFoundException(id);
+        }
+
+        var subtasks = await GetSubtaskIdsAsync(id, cancellationToken);
+        foreach (var subtaskId in subtasks)
+        {
+            await UpdateTaskRootAsync(subtaskId, null, cancellationToken);
+        }
+
+        await _table.DeleteItemAsync(item.RootTaskId?.ToString() ?? "null", id, cancellationToken);
     }
 
     public async Task<IEnumerable<Guid>> GetAllSubtaskIdsRecursivelyAsync(Guid taskId, CancellationToken cancellationToken)
@@ -52,26 +62,12 @@ public class TasksRepository : ITasksRepository
 
     public async Task<TaskEntity> GetByIdAsync(Guid id, CancellationToken cancellationToken)
     {
-        QueryRequest queryRequest = new QueryRequest
-        {
-            TableName = Constants.TasksTableName,
-            IndexName = Constants.TasksGlobalIdIndexName,
-            KeyConditionExpression = "Id = :id",
-            ExpressionAttributeValues = new Dictionary<string, AttributeValue>
-            {
-                { ":id", new AttributeValue { S = id.ToString() } }
-            },
-            Limit = 1
-        };
-
-        var documents = await _dynamoDBClient.QueryAsync(queryRequest, cancellationToken);
-        var entity = documents.Items.Select(x => x.ToTaskEntity()).FirstOrDefault() ?? throw new EntityNotFoundException(id);
+        var entity = await GetByIdIndexAsync(id, cancellationToken);
 
         // Not the best way to do this, costs 2 RCU, need to reconsider in future
         if (entity.RootTaskId is not null)
         {
-            using var context = new DynamoDBContext(_dynamoDBClient);
-            entity.RootTask = await context.LoadAsync<TaskEntity>(entity.RootTaskId, entity.Id, cancellationToken);
+            entity.RootTask = await GetByIdIndexAsync(entity.RootTaskId.Value, cancellationToken);
         }
 
         return entity;
@@ -79,7 +75,6 @@ public class TasksRepository : ITasksRepository
 
     public async Task<(IEnumerable<TaskEntity> Entities, object ContinuationToken)> GetRootTaskBatchAsync(int take, object continuationToken, string sortBy, bool descending, CancellationToken cancellationToken)
     {
-        var continuationTokenParsed = JsonSerializer.Deserialize<Dictionary<string, AttributeValue>>(continuationToken?.ToString() ?? "");
         var sortIndexName = sortBy switch
         {
             "Summary" => Constants.TasksLocalSummaryIndexName,
@@ -94,16 +89,16 @@ public class TasksRepository : ITasksRepository
         {
             TableName = Constants.TasksTableName,
             IndexName = sortIndexName,
-            KeyConditionExpression = "RootTaskId = :rootTaskId",
+            KeyConditionExpression = "RootTaskId = :null",
             ExpressionAttributeValues = new Dictionary<string, AttributeValue>
             {
-                { ":rootTaskId", new AttributeValue { NULL = true } }
+                { ":null", new AttributeValue { S = "null" } }
             },
             ScanIndexForward = !descending,
             Limit = take
         };
 
-        if (continuationTokenParsed is not null)
+        if (continuationToken is not null && continuationToken is Dictionary<string, AttributeValue> continuationTokenParsed)
         {
             queryRequest.ExclusiveStartKey = continuationTokenParsed;
         }
@@ -134,28 +129,29 @@ public class TasksRepository : ITasksRepository
 
     public async Task<(IEnumerable<TaskSearchEntity> Entities, object ContinuationToken)> SearchTasksAsync(string keyPhrase, int take, object continuationToken, CancellationToken cancellationToken)
     {
-        var continuationTokenParsed = JsonSerializer.Deserialize<Dictionary<string, AttributeValue>>(continuationToken?.ToString() ?? "");
-
-        QueryRequest queryRequest = new QueryRequest
+        var request = new ScanRequest
         {
             TableName = Constants.TasksTableName,
-            IndexName = Constants.TasksLocalSummaryIndexName,
-            KeyConditionExpression = "RootTaskId = :rootTaskId and contains(Summary, :keyPhrase)",
+            ExpressionAttributeNames = new Dictionary<string, string>
+            {
+                { "#sm", "Summary" },
+                { "#ds", "Description" }
+            },
             ExpressionAttributeValues = new Dictionary<string, AttributeValue>
             {
-                { ":rootTaskId", new AttributeValue { NULL = true } },
-                { ":keyPhrase", new AttributeValue { S = keyPhrase } }
+                { ":keyPhrase", new AttributeValue { S = keyPhrase } },
             },
-            Limit = take,
-            AttributesToGet = new List<string> { "Id", "Summary", "Description" }
+            FilterExpression = "contains(#sm, :keyPhrase) or contains(#ds, :keyPhrase)",
+            ProjectionExpression = "Id, Summary, Description",
+            Limit = take
         };
 
-        if (continuationTokenParsed is not null)
+        if (continuationToken is not null && continuationToken is Dictionary<string, AttributeValue> continuationTokenParsed)
         {
-            queryRequest.ExclusiveStartKey = continuationTokenParsed;
+            request.ExclusiveStartKey = continuationTokenParsed;
         }
 
-        var response = await _dynamoDBClient.QueryAsync(queryRequest, cancellationToken);
+        var response = await _dynamoDBClient.ScanAsync(request, cancellationToken);
         var entities = response.Items.Select(x => x.ToTaskSearchEntity());
 
         return (entities, response.LastEvaluatedKey);
@@ -163,34 +159,92 @@ public class TasksRepository : ITasksRepository
 
     public async Task<TaskEntity> UpdateAsync(TaskEntity entity, CancellationToken cancellationToken)
     {
-        var taskDocument = new Document();
-        taskDocument["Id"] = entity.Id;
-
-        taskDocument["Summary"] = entity.Summary;
-        taskDocument["Description"] = entity.Description;
-        taskDocument["Priority"] = entity.Priority.ToString();
-        taskDocument["Status"] = entity.Status.ToString();
-        taskDocument["DueDate"] = entity.DueDate;
-
-        var config = new UpdateItemOperationConfig
+        var entityOld = await GetByIdIndexAsync(entity.Id, cancellationToken);
+        if (entityOld is null)
         {
-            ReturnValues = ReturnValues.AllNewAttributes
+            throw new EntityNotFoundException(entity.Id);
+        }
+
+        var request = new UpdateItemRequest
+        {
+            AttributeUpdates = new()
+            {
+                ["Summary"] = new AttributeValueUpdate
+                {
+                    Action = AttributeAction.PUT,
+                    Value = new AttributeValue { S = entity.Summary }
+                },
+                ["Description"] = new AttributeValueUpdate
+                {
+                    Action = AttributeAction.PUT,
+                    Value = new AttributeValue { S = entity.Description }
+                },
+                ["Priority"] = new AttributeValueUpdate
+                {
+                    Action = AttributeAction.PUT,
+                    Value = new AttributeValue { N = ((byte)entity.Priority).ToString() }
+                },
+                ["Status"] = new AttributeValueUpdate
+                {
+                    Action = AttributeAction.PUT,
+                    Value = new AttributeValue { N = ((byte)entity.Status).ToString() }
+                },
+                ["DueDate"] = new AttributeValueUpdate
+                {
+                    Action = AttributeAction.PUT,
+                    Value = new AttributeValue { S = entity.DueDate.ToString() }
+                }
+            },
+            TableName = Constants.TasksTableName,
+            Key = new Dictionary<string, AttributeValue>
+            {
+                { "Id", new AttributeValue { S = entity.Id.ToString() } },
+                { "RootTaskId", new AttributeValue { S = entityOld.RootTaskId?.ToString() ?? "null" } }
+            },
+            ReturnValues = ReturnValue.NONE,
         };
 
-        var updated = await _table.UpdateItemAsync(taskDocument, config, cancellationToken);
+        var response = await _dynamoDBClient.UpdateItemAsync(request, cancellationToken);
 
-        return updated.ToTaskEntity();
+        if (response.HttpStatusCode == System.Net.HttpStatusCode.OK)
+        {
+            return entity;
+        }
+
+        throw new Exception("Failed to update task");
     }
 
     public async Task UpdateTaskRootAsync(Guid taskId, Guid? newRootId, CancellationToken cancellationToken)
     {
         var taskDocument = new Document();
         taskDocument["Id"] = taskId;
-        taskDocument["RootTaskId"] = newRootId?.ToString();
+        taskDocument["RootTaskId"] = newRootId?.ToString() ?? "null";
 
-        await _table.UpdateItemAsync(taskDocument, cancellationToken);
+        var item = await GetByIdIndexAsync(taskId, cancellationToken);
+        if (item is null)
+        {
+            throw new EntityNotFoundException(taskId);
+        }
+
+        var oldRootTaskId = item.RootTaskId?.ToString() ?? "null";
+        await _table.DeleteItemAsync(oldRootTaskId, taskId, cancellationToken);
+        var newItem = new TaskEntity
+        {
+            Id = item.Id,
+            RootTaskId = newRootId,
+            Summary = item.Summary,
+            Description = item.Description,
+            CreateDate = item.CreateDate,
+            DueDate = item.DueDate,
+            Priority = item.Priority,
+            Status = item.Status
+        };
+
+        await AddAsync(newItem, cancellationToken);
     }
 
+    // Same here. I need only Id's, but AttributeToGet doesn't work with KeyConditionExpression
+    // Reconsider index projections???
     private async Task<IEnumerable<Guid>> GetSubtaskIdsAsync(Guid taskId, CancellationToken cancellationToken)
     {
         QueryRequest queryRequest = new QueryRequest
@@ -200,13 +254,32 @@ public class TasksRepository : ITasksRepository
             ExpressionAttributeValues = new Dictionary<string, AttributeValue>
             {
                 { ":rootTaskId", new AttributeValue { S = taskId.ToString() } }
-            },
-            AttributesToGet = new List<string> { "Id" }
+            }
         };
 
         var documents = await _dynamoDBClient.QueryAsync(queryRequest, cancellationToken);
         var ids = documents.Items.Select(x => x["Id"].S).Select(Guid.Parse);
 
         return ids;
+    }
+
+    private async Task<TaskEntity> GetByIdIndexAsync(Guid id, CancellationToken cancellationToken)
+    {
+        QueryRequest queryRequest = new QueryRequest
+        {
+            TableName = Constants.TasksTableName,
+            IndexName = Constants.TasksGlobalIdIndexName,
+            KeyConditionExpression = "Id = :id",
+            ExpressionAttributeValues = new Dictionary<string, AttributeValue>
+            {
+                { ":id", new AttributeValue { S = id.ToString() } }
+            },
+            Limit = 1
+        };
+
+        var documents = await _dynamoDBClient.QueryAsync(queryRequest, cancellationToken);
+        var entity = documents.Items.Select(x => x.ToTaskEntity()).FirstOrDefault() ?? throw new EntityNotFoundException(id);
+
+        return entity;
     }
 }

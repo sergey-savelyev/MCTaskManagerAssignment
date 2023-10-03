@@ -25,7 +25,7 @@ public class DatabaseInitializer
         await CreateLogsTableAsync(cancellationToken);
     }
 
-    private Task CreateTasksTableAsync(CancellationToken cancellationToken)
+    private async Task CreateTasksTableAsync(CancellationToken cancellationToken)
     {
         var request = new CreateTableRequest
         {
@@ -44,7 +44,6 @@ public class DatabaseInitializer
                 new(nameof(TaskEntity.DueDate), ScalarAttributeType.S),
                 new(nameof(TaskEntity.Priority), ScalarAttributeType.N),
                 new(nameof(TaskEntity.Status), ScalarAttributeType.N),
-                new(nameof(TaskEntity.Description), ScalarAttributeType.S)
             },
             KeySchema = new()
             {
@@ -141,10 +140,11 @@ public class DatabaseInitializer
             },
         };
 
-        return _dynamoDBClient.CreateTableAsync(request, cancellationToken);
+        await _dynamoDBClient.CreateTableAsync(request, cancellationToken);
+        await WaitUntilTableReady(Constants.TasksTableName);
     }
 
-    private Task CreateLogsTableAsync(CancellationToken cancellationToken)
+    private async Task CreateLogsTableAsync(CancellationToken cancellationToken)
     {
         var request = new CreateTableRequest
         {
@@ -157,15 +157,14 @@ public class DatabaseInitializer
             AttributeDefinitions = new()
             {
                 new(nameof(LogEntity.Id), ScalarAttributeType.S),
-                new(nameof(LogEntity.EntityId), ScalarAttributeType.S),
-                new(nameof(LogEntity.EntityType), ScalarAttributeType.S),
                 new(nameof(LogEntity.TimestampMsec), ScalarAttributeType.N),
-                new(nameof(LogEntity.Action), ScalarAttributeType.N),
-                new(nameof(LogEntity.Payload), ScalarAttributeType.S)
+                new(nameof(LogEntity.EntityId), ScalarAttributeType.S),
+                new(nameof(LogEntity.EntityType), ScalarAttributeType.S)
             },
             KeySchema = new()
             {
-                new(nameof(LogEntity.Id), KeyType.HASH)
+                new(nameof(LogEntity.Id), KeyType.HASH),
+                new(nameof(LogEntity.TimestampMsec), KeyType.RANGE)
             },
             GlobalSecondaryIndexes = new()
             {
@@ -174,7 +173,8 @@ public class DatabaseInitializer
                     IndexName = Constants.LogsGlobalEntityIdIndexName,
                     KeySchema = new()
                     {
-                        new(nameof(LogEntity.EntityId), KeyType.HASH)
+                        new(nameof(LogEntity.EntityId), KeyType.HASH),
+                        new(nameof(LogEntity.TimestampMsec), KeyType.RANGE)
                     },
                     ProvisionedThroughput = new()
                     {
@@ -191,7 +191,8 @@ public class DatabaseInitializer
                     IndexName = Constants.LogsGlobalEntityTypeNameIndexName,
                     KeySchema = new()
                     {
-                        new(nameof(LogEntity.EntityType), KeyType.HASH)
+                        new(nameof(LogEntity.EntityType), KeyType.HASH),
+                        new(nameof(LogEntity.TimestampMsec), KeyType.RANGE)
                     },
                     ProvisionedThroughput = new()
                     {
@@ -206,6 +207,31 @@ public class DatabaseInitializer
             }
         };
 
-        return _dynamoDBClient.CreateTableAsync(request, cancellationToken);
+        await _dynamoDBClient.CreateTableAsync(request, cancellationToken);
+        await WaitUntilTableReady(Constants.LogsTableName);
+    }
+
+    private async Task WaitUntilTableReady(string tableName)
+    {
+        string? status = null;
+        // Let us wait until table is created. Call DescribeTable.
+        do
+        {
+            Thread.Sleep(5000); // Wait 5 seconds.
+            try
+            {
+                var response = await _dynamoDBClient.DescribeTableAsync(new DescribeTableRequest
+                {
+                    TableName = tableName
+                });
+
+                status = response.Table.TableStatus;
+            }
+            catch (ResourceNotFoundException)
+            {
+                // DescribeTable is eventually consistent. So you might
+                // get resource not found. So we handle the potential exception.
+            }
+        } while (status != "ACTIVE");
     }
 }

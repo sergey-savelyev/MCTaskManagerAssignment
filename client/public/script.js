@@ -85,7 +85,7 @@ function reloadLogs() {
 
 function loadLogs() {
   $.ajax({
-      url: `http://localhost:5006/api/tasks/logs?take=${logsTakeValue}${logsSkipValue ? '&continuationToken=' + logsSkipValue : ''}`,
+      url: `http://localhost:5006/api/tasks/logs?take=${logsTakeValue}${logsSkipValue ? '&continuationToken=' + logsSkipValue : ''}&descending=false`,
       method: 'GET',
       success: function(data) {
           if (data.entities.length < logsTakeValue) {
@@ -206,7 +206,7 @@ function openTaskDetails(taskId, error) {
         $('#taskDetailsModal').modal('show');
 
         if (error) {
-            console.log(error);
+            console.error(error);
             $('#te_alert').show();
             $('#te_alertText').text(error.responseText);
         }
@@ -284,7 +284,7 @@ function updateSearchResults(results) {
 
   results.forEach(function(result) {
     const summary = result.summary.substring(0, 40);
-    const description = result.description.substring(0, 40);
+    const description = result.description?.substring(0, 40) ?? "";
     const row = `<tr><td class="hidden">${result.id}</td><td>${summary}</td><td>${description}</td></tr>`;
     searchResultsTable.append(row);
   });
@@ -384,9 +384,7 @@ $('#rootTaskTable tbody').on('click', '.delete-button', function(event) {
   $('#taskDetailsModal').data('root-id', null);
   API.updateTaskRoot($('#taskDetailsModal').data('task-id'), null)
     .done(function(data) {
-      $(this).closest('tr').remove();
-      $('#te_alertSuccessText').text('Successfully updated');
-      $('#te_alertSuccess').show();
+      $('#rootTaskTable tbody tr').remove();
     })
     .fail(function(error) {
       $("#te_alertText").text(error.responseText);

@@ -40,8 +40,6 @@ public class LogsRepository : ILogsRepository
 
     public async Task<(IEnumerable<LogEntity> Entities, object ContinuationToken)> GetLogBatchByEntityAsync(Guid entityId, object continuationToken, int take, bool descending, CancellationToken cancellationToken)
     {
-        var continuationTokenParsed = JsonSerializer.Deserialize<Dictionary<string, AttributeValue>>(continuationToken?.ToString() ?? "");
-
         QueryRequest queryRequest = new QueryRequest
         {
             TableName = Constants.LogsTableName,
@@ -55,7 +53,7 @@ public class LogsRepository : ILogsRepository
             Limit = take
         };
 
-        if (continuationTokenParsed is not null)
+        if (continuationToken is not null && continuationToken is Dictionary<string, AttributeValue> continuationTokenParsed)
         {
             queryRequest.ExclusiveStartKey = continuationTokenParsed;
         }
@@ -68,8 +66,6 @@ public class LogsRepository : ILogsRepository
 
     public async Task<(IEnumerable<LogEntity> Entities, object ContinuationToken)> GetLogBatchByEntityTypeAsync(string entityType, object continuationToken, int take, bool descending, CancellationToken cancellationToken)
     {
-        var continuationTokenParsed = JsonSerializer.Deserialize<Dictionary<string, AttributeValue>>(continuationToken?.ToString() ?? "");
-
         QueryRequest queryRequest = new QueryRequest
         {
             TableName = Constants.LogsTableName,
@@ -83,7 +79,7 @@ public class LogsRepository : ILogsRepository
             Limit = take,
         };
 
-        if (continuationTokenParsed is not null)
+        if (continuationToken is not null && continuationToken is Dictionary<string, AttributeValue> continuationTokenParsed)
         {
             queryRequest.ExclusiveStartKey = continuationTokenParsed;
         }

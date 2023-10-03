@@ -27,7 +27,7 @@ public static class MappingExtensions
         var document = new Document
         {
             ["Id"] = entity.Id.ToString(),
-            ["RootTaskId"] = entity.RootTaskId?.ToString(),
+            ["RootTaskId"] = entity.RootTaskId?.ToString() ?? "null",
             ["Summary"] = entity.Summary,
             ["Description"] = entity.Description,
             ["Priority"] = (byte)entity.Priority,
@@ -44,9 +44,9 @@ public static class MappingExtensions
         var entity = new TaskEntity
         {
             Id = Guid.Parse(document["Id"].AsString()),
-            RootTaskId = document["RootTaskId"].AsString() is null ? null : Guid.Parse(document["RootTaskId"].AsString()),
+            RootTaskId = document["RootTaskId"].AsString() is null || document["RootTaskId"].AsString() == "null" ? null : Guid.Parse(document["RootTaskId"].AsString()),
             Summary = document["Summary"].AsString(),
-            Description = document["Description"].AsString(),
+            Description = document.ContainsKey("Description") ? document["Description"].AsString() : null,
             Priority = (TaskPriority)document["Priority"].AsByte(),
             Status = (Core.Enums.TaskStatus)document["Status"].AsByte(),
             CreateDate = document["CreateDate"].AsDateTime(),
@@ -61,9 +61,9 @@ public static class MappingExtensions
         var entity = new TaskEntity
         {
             Id = Guid.Parse(item["Id"].S),
-            RootTaskId = item["RootTaskId"].S is null ? null : Guid.Parse(item["RootTaskId"].S),
+            RootTaskId = item["RootTaskId"]?.S is null || item["RootTaskId"].S == "null" ? null : Guid.Parse(item["RootTaskId"].S),
             Summary = item["Summary"].S,
-            Description = item["Description"].S,
+            Description = item.ContainsKey("Description") ? item["Description"].S : null,
             Priority = Enum.Parse<TaskPriority>(item["Priority"].N),
             Status = Enum.Parse<Core.Enums.TaskStatus>(item["Status"].N),
             CreateDate = DateTime.Parse(item["CreateDate"].S),
@@ -79,7 +79,7 @@ public static class MappingExtensions
         (
             Guid.Parse(item["Id"].S),
             item["Summary"].S,
-            item["Description"].S
+            item.ContainsKey("Description") ? item["Description"].S : null
         );
 
         return entity;
@@ -94,7 +94,7 @@ public static class MappingExtensions
             EntityType = document["EntityType"].AsString(),
             Action = (TaskAction)document["Action"].AsByte(),
             TimestampMsec = document["TimestampMsec"].AsLong(),
-            Payload = document["Payload"].AsString()
+            Payload = document.ContainsKey("Payload") ? document["Payload"].AsString() : null
         };
 
         return entity;
@@ -109,7 +109,7 @@ public static class MappingExtensions
             EntityType = item["EntityType"].S,
             Action = Enum.Parse<TaskAction>(item["Action"].N),
             TimestampMsec = long.Parse(item["TimestampMsec"].N),
-            Payload = item["Payload"].S
+            Payload = item.ContainsKey("Payload") ? item["Payload"].S : null
         };
 
         return entity;
