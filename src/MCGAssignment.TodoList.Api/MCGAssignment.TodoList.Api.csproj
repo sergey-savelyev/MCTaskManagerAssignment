@@ -5,10 +5,9 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <INFRA_DB_TYPE>DynamoDB</INFRA_DB_TYPE>
+    <DatabaseType Condition="'$(DatabaseType)' == ''">MySQL</DatabaseType>
   </PropertyGroup>
     
-
     <ItemGroup>
       <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="7.0.11" />
       <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
@@ -16,7 +15,7 @@
 
     <ItemGroup>
       <ProjectReference Include="../MCGAssignment.TodoList.Application/MCGAssignment.TodoList.Application.csproj" />
-      <ProjectReference Include="../MCGAssignment.TodoList.Infrastructure.$(INFRA_DB_TYPE)/MCGAssignment.TodoList.Infrastructure.$(INFRA_DB_TYPE).csproj" />
+      <ProjectReference Include="../MCGAssignment.TodoList.Infrastructure.$(DatabaseType)/MCGAssignment.TodoList.Infrastructure.$(DatabaseType).csproj" />
     </ItemGroup>
 
   </Project>

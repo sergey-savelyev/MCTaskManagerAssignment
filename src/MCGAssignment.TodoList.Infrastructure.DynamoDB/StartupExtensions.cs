@@ -1,6 +1,4 @@
-using Amazon;
 using Amazon.DynamoDBv2;
-using Amazon.Extensions.NETCore.Setup;
 using MCGAssignment.TodoList.Application.Repositories;
 using MCGAssignment.TodoList.Application.Services;
 using MCGAssignment.TodoList.Infrastructure.DynamoDB;
@@ -16,13 +14,11 @@ public static class StartupExtensions
     {
         services.AddSingleton<ITaskService, TaskService>();
         services.AddSingleton<ITaskActionLogService, TaskActionLogService>();
-        Console.WriteLine("DynamoDB:ServiceURL: " + configuration["DynamoDB:ServiceURL"]);
-        Console.WriteLine("DynamoDB:RegionEndpoint: " + configuration["DynamoDB:Region"]);
         services.AddSingleton<IAmazonDynamoDB>(sp =>
         {
             var clientConfig = new AmazonDynamoDBConfig
             {
-                ServiceURL = "http://localhost:8000"
+                ServiceURL = configuration["DynamoDB:ServiceURL"]
             };
 
             return new AmazonDynamoDBClient(clientConfig);

@@ -16,16 +16,15 @@ services:
     working_dir: /home/dynamodblocal
   mcgassignmenttodolist:
     environment:
-        AWS_ACCESS_KEY_ID: 'DUMMYIDEXAMPLE'
-        AWS_SECRET_ACCESS_KEY: 'DUMMYEXAMPLEKEY'
-        REGION: 'eu-west-1'
-        INFRA_DB_TYPE: DynamoDb
+      AWS_ACCESS_KEY_ID: 'DUMMYIDEXAMPLE'
+      AWS_SECRET_ACCESS_KEY: 'DUMMYEXAMPLEKEY'
+      REGION: 'eu-north-1'
     depends_on:
       - dynamodb-local
     image: mcgassignmenttodolist
     build:
       context: .
-      dockerfile: src/MCGAssignment.TodoList.Api/Dockerfile
+      dockerfile: src/MCGAssignment.TodoList.Api/Dockerfile.DynamoDB
     ports:
       - 5006:5006
   mcgassignmenttodolist-client:
