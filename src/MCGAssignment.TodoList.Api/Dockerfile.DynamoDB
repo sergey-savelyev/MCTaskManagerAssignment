@@ -16,11 +16,11 @@ COPY ["src/MCGAssignment.TodoList.Api/MCGAssignment.TodoList.Api.csproj", "MCGAs
 RUN dotnet restore "MCGAssignment.TodoList.Api/MCGAssignment.TodoList.Api.csproj"
 COPY src .
 WORKDIR "/src/MCGAssignment.TodoList.Api"
-RUN dotnet build "MCGAssignment.TodoList.Api.csproj" -c $configuration -o /app/build /p:DatabaseType=MySQL
+RUN dotnet build "MCGAssignment.TodoList.Api.csproj" -c $configuration -o /app/build /p:DatabaseType=DynamoDB
 
 FROM build AS publish
 ARG configuration=Release
-RUN dotnet publish "MCGAssignment.TodoList.Api.csproj" -c $configuration -o /app/publish /p:UseAppHost=false /p:DatabaseType=MySQL
+RUN dotnet publish "MCGAssignment.TodoList.Api.csproj" -c $configuration -o /app/publish /p:UseAppHost=false /p:DatabaseType=DynamoDB
 
 FROM base AS final
 WORKDIR /app

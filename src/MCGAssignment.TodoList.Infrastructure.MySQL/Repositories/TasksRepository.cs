@@ -44,11 +44,11 @@ public class TasksRepository : ITasksRepository
             throw new EntityNotFoundException(entity.Id);
         }
 
-        entity.Summary = entityToUpdate.Summary;
-        entity.Description = entityToUpdate.Description;
-        entity.DueDate = entityToUpdate.DueDate;
-        entity.Priority = entityToUpdate.Priority;
-        entity.Status = entityToUpdate.Status;
+        entityToUpdate.Summary = entity.Summary;
+        entityToUpdate.Description = entity.Description;
+        entityToUpdate.DueDate = entity.DueDate;
+        entityToUpdate.Priority = entity.Priority;
+        entityToUpdate.Status = entity.Status;
 
         await _context.SaveChangesAsync(cancellationToken);
         
@@ -70,8 +70,13 @@ public class TasksRepository : ITasksRepository
         return subtaskEntities;
     }
 
-    public async Task<IEnumerable<TaskEntity>> GetRootTaskBatchAsync(int take, int skip, string sortBy, bool descending, CancellationToken cancellationToken)
+    public async Task<(IEnumerable<TaskEntity> Entities, object ContinuationToken)> GetRootTaskBatchAsync(int take, object continuationToken, string sortBy, bool descending, CancellationToken cancellationToken)
     {
+        if (int.TryParse(continuationToken?.ToString(), out var skip) is false)
+        {
+            skip = 0;
+        }
+
         var entities = await _context.Tasks
             .Where(x => x.RootTaskId == null)
             .OrderBy(ResolveOrderProperty(sortBy), descending)
@@ -79,12 +84,22 @@ public class TasksRepository : ITasksRepository
             .Take(take)
             .ToListAsync(cancellationToken);
 
+        int newContinuationToken = 0;
+        if (entities.Count == take)
+        {
+            newContinuationToken = skip + take;
+        }
 
-        return entities;
+        return (Entities: entities, ContinuationToken: newContinuationToken);
     }
 
-    public async Task<IEnumerable<TaskSearchEntity>> SearchTasksAsync(string keyPhrase, int take, int skip, CancellationToken cancellationToken)
+    public async Task<(IEnumerable<TaskSearchEntity> Entities, object ContinuationToken)> SearchTasksAsync(string keyPhrase, int take, object continuationToken, CancellationToken cancellationToken)
     {
+        if (int.TryParse(continuationToken?.ToString(), out var skip) is false)
+        {
+            skip = 0;
+        }
+
         keyPhrase = keyPhrase.Trim().ToLower();
         var entities = 
             await _context.Tasks
@@ -97,7 +112,13 @@ public class TasksRepository : ITasksRepository
                 .Select(x => new TaskSearchEntity(x.Id, x.Summary, x.Description))
                 .ToListAsync(cancellationToken);
 
-        return entities;
+        int newContinuationToken = 0;
+        if (entities.Count == take)
+        {
+            newContinuationToken = skip + take;
+        }
+
+        return (Entities: entities, ContinuationToken: newContinuationToken);
     }
 
     public async Task<IEnumerable<Guid>> GetAllSubtaskIdsRecursivelyAsync(Guid taskId, CancellationToken cancellationToken)

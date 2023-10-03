@@ -28,13 +28,13 @@ public static class MappingExtensions
     {
         Id = entity.Id,
         RootId = entity.RootTaskId,
+        RootTask = entity.RootTask?.ToBaseView(),
         Summary = entity.Summary,
         Priority = entity.Priority,
         Status = entity.Status,
         Description = entity.Description,
         CreateDate = entity.CreateDate,
         DueDate = entity.DueDate,
-        RootTask = entity.RootTask?.ToBaseView(),
         Subtasks = subtasks.ToList()
     };
 

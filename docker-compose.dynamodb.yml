@@ -1,0 +1,42 @@
+# Please refer https://aka.ms/HTTPSinContainer on how to setup an https developer certificate for your ASP.NET Core service.
+
+version: '3.4'
+
+services:
+  dynamodb-local:
+    command: "-jar DynamoDBLocal.jar -sharedDb -dbPath ./data"
+    image: "amazon/dynamodb-local:latest"
+    container_name: dynamodb-local
+    ports:
+      - "8000:8000"
+    expose:
+      - '8000'
+    volumes:
+      - ".:/home/dynamodblocal/data"
+    working_dir: /home/dynamodblocal
+  mcgassignmenttodolist:
+    environment:
+      AWS_ACCESS_KEY_ID: 'DUMMYIDEXAMPLE'
+      AWS_SECRET_ACCESS_KEY: 'DUMMYEXAMPLEKEY'
+      REGION: 'eu-north-1'
+    depends_on:
+      - dynamodb-local
+    image: mcgassignmenttodolist
+    build:
+      context: .
+      dockerfile: src/MCGAssignment.TodoList.Api/Dockerfile.DynamoDB
+    ports:
+      - 5006:5006
+  mcgassignmenttodolist-client:
+    depends_on:
+      - mcgassignmenttodolist
+    image: mcgassignmenttodolist-client
+    build:
+      context: .
+      dockerfile: client/Dockerfile
+    ports:
+      - 3939:3939
+
+volumes:
+  db:
+    driver: local

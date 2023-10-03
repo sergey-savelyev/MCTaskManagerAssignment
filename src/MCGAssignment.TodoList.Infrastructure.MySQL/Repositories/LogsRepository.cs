@@ -1,4 +1,3 @@
-using System.Linq.Expressions;
 using MCGAssignment.TodoList.Application.Exceptions;
 using MCGAssignment.TodoList.Application.Repositories;
 using MCGAssignment.TodoList.Core.Entities;
@@ -56,40 +55,49 @@ public class LogsRepository : ILogsRepository
         await _context.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task<IEnumerable<LogEntity>> GetLogBatchByEntityTypeAsync<TEntity>(int skip, int take, string orderBy, bool descending, CancellationToken cancellationToken)
+    public async Task<(IEnumerable<LogEntity> Entities, object ContinuationToken)> GetLogBatchByEntityTypeAsync(string entityType, object continuationToken, int take, bool descending, CancellationToken cancellationToken)
     {
+        if (int.TryParse(continuationToken?.ToString(), out var skip) is false)
+        {
+            skip = 0;
+        }
+
         var entities = await _context.Logs
-            .Where(x => x.EntityType == nameof(TEntity))
-            .OrderBy(ResolveOrderProperty(orderBy), descending)
+            .Where(x => x.EntityType == entityType)
+            .OrderBy(x => x.TimestampMsec, descending)
             .Skip(skip)
             .Take(take)
             .ToListAsync(cancellationToken);
 
-        return entities;
+        int newContinuationToken = 0;
+        if (entities.Count == take)
+        {
+            newContinuationToken = skip + take;
+        }
+
+        return (entities, newContinuationToken);
     }
 
-    public async Task<IEnumerable<LogEntity>> GetLogBatchByEntityAsync(Guid entityId, int skip, int take, string orderBy, bool descending, CancellationToken cancellationToken)
+    public async Task<(IEnumerable<LogEntity> Entities, object ContinuationToken)> GetLogBatchByEntityAsync(Guid entityId, object continuationToken, int take, bool descending, CancellationToken cancellationToken)
     {
+        if (int.TryParse(continuationToken?.ToString(), out var skip) is false)
+        {
+            skip = 0;
+        }
+
         var entities = await _context.Logs
             .Where(x => x.EntityId.HasValue && x.EntityId == entityId)
-            .OrderBy(ResolveOrderProperty(orderBy), descending)
+            .OrderBy(x => x.TimestampMsec, descending)
             .Skip(skip)
             .Take(take)
             .ToListAsync(cancellationToken);
 
-        return entities;
-    }
+        int newContinuationToken = 0;
+        if (entities.Count == take)
+        {
+            newContinuationToken = skip + take;
+        }
 
-    // I could use an expression tree here, but I don't really think it's worth it.
-    // Expression trees are quite hard to read, understand and debug.
-    // So if number of properties is small, I prefer to use old but gold switch-case.
-    private static Expression<Func<LogEntity, object?>> ResolveOrderProperty(string propertyName) => propertyName switch
-    {
-        nameof(LogEntity.Id) => x => x.Id,
-        nameof(LogEntity.Action) => x => x.Action,
-        nameof(LogEntity.TimestampMsec) => x => x.TimestampMsec,
-        nameof(LogEntity.EntityId) => x => x.EntityId,
-        nameof(LogEntity.Payload) => x => x.Payload,
-        _ => throw new ArgumentException("Unsupported order property")
-    };
+        return (entities, newContinuationToken);
+    }
 }

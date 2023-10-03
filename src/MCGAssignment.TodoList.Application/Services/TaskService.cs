@@ -1,4 +1,3 @@
-using System.Linq.Expressions;
 using MCGAssignment.TodoList.Application.Exceptions;
 using MCGAssignment.TodoList.Application.Extensions;
 using MCGAssignment.TodoList.Application.DataTransferObjects;
@@ -41,15 +40,15 @@ public class TaskService : ITaskService
         return result;
     }
 
-    public async Task<IEnumerable<TaskViewDetailed>> GetRootTaskBatchAsync(int take, int skip, string sortBy, bool descending, CancellationToken cancellationToken)
+    public async Task<(IEnumerable<TaskViewDetailed> Entities, object ContinuationToken)> GetRootTaskBatchAsync(int take, object continuationToken, string sortBy, bool descending, CancellationToken cancellationToken)
     {
-        var entities = await _repository.GetRootTaskBatchAsync(take, skip, sortBy, descending, cancellationToken);
-        var taskDetails = entities.Select(x => x.ToDetailedView());
+        var result = await _repository.GetRootTaskBatchAsync(take, continuationToken, sortBy, descending, cancellationToken);
+        var taskDetails = result.Entities.Select(x => x.ToDetailedView());
 
-        return taskDetails;
+        return (taskDetails, result.ContinuationToken);
     }
 
-    public async Task<Guid> CreateTaskAsync(UpsertTaskData taskDetails, CancellationToken cancellationToken)
+    public async Task<Guid> CreateTaskAsync(UpsertTaskDto taskDetails, CancellationToken cancellationToken)
     {
          var newEntity = new TaskEntity
         {
@@ -68,7 +67,7 @@ public class TaskService : ITaskService
         return newEntity.Id;
     }
 
-    public async Task UpdateTaskAsync(Guid taskId, UpsertTaskData updateData, CancellationToken cancellationToken)
+    public async Task UpdateTaskAsync(Guid taskId, UpsertTaskDto updateData, CancellationToken cancellationToken)
     {        
         var entity = new TaskEntity
         {
@@ -105,10 +104,10 @@ public class TaskService : ITaskService
         await _logService.LogTaskActionAsync(TaskAction.RootChanged, taskId, new { RootId = newRootId }, cancellationToken);
     }
 
-    public async Task<IEnumerable<TaskSearchView>> SearchTasksAsync(string keyPhrase, int take, int skip, CancellationToken cancellationToken)
+    public async Task<(IEnumerable<TaskSearchView> Entities, object ContinuationToken)> SearchTasksAsync(string keyPhrase, int take, object continuationToken, CancellationToken cancellationToken)
     {
-        var searchResultEntities = await _repository.SearchTasksAsync(keyPhrase, take, skip, cancellationToken);
+        var searchResult = await _repository.SearchTasksAsync(keyPhrase, take, continuationToken, cancellationToken);
 
-        return searchResultEntities.Select(x => x.ToSearchView());
+        return (searchResult.Entities.Select(x => x.ToSearchView()), searchResult.ContinuationToken);
     }
 }

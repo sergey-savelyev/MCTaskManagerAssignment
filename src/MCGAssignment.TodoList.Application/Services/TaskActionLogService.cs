@@ -31,17 +31,17 @@ public class TaskActionLogService : ITaskActionLogService
         await _repository.AddAsync(logEntry, cancellationToken);
     }
 
-    public async Task<IEnumerable<LogEntryView>> GetTaskActionLogBatchAsync(int skip, int take, string orderBy, bool descending, CancellationToken cancellationToken)
+    public async Task<(IEnumerable<LogEntryView> Entities, object ContinuationToken)> GetTaskActionLogBatchAsync(object continuationToken, int take, bool descending, CancellationToken cancellationToken)
     {
-        var entities = await _repository.GetLogBatchByEntityTypeAsync<TaskEntity>(skip, take, orderBy, descending, cancellationToken);
+        var result = await _repository.GetLogBatchByEntityTypeAsync(nameof(TaskEntity), continuationToken, take, descending, cancellationToken);
 
-        return entities.Select(x => x.ToView());
+        return (result.Entities.Select(x => x.ToView()), result.ContinuationToken);
     }
 
-    public async Task<IEnumerable<LogEntryView>> GetTaskActionLogBatchByTaskAsync(Guid taskId, int skip, int take, string orderBy, bool descending, CancellationToken cancellationToken)
+    public async Task<(IEnumerable<LogEntryView> Entities, object ContinuationToken)> GetTaskActionLogBatchByTaskAsync(Guid taskId, object continuationToken, int take,bool descending, CancellationToken cancellationToken)
     {
-        var entities = await _repository.GetLogBatchByEntityAsync(taskId, skip, take, orderBy, descending, cancellationToken);
+        var result = await _repository.GetLogBatchByEntityAsync(taskId, continuationToken, take, descending, cancellationToken);
 
-        return entities.Select(x => x.ToView());
+        return (result.Entities.Select(x => x.ToView()), result.ContinuationToken);
     }
 }
