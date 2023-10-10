@@ -24,15 +24,6 @@ Stay tuned!
 - Optimized utilization of DbContext class;
 - Minor general refactoring and improvements.
 
-# Why and how
-
-## DynamoDB and MySQL
-In the assignment requirements there was one about the database. I could implement the storage using DynamoDB and MySQL. Since I don't have much experience with Dynamo DB, I went with MySQL. But I couldn't stop just like that. I took a course at Pluralsight, learned a bit about DynamoDB and decided to implement it as well. Sure thing it's not the best implementation and some things could be optimized much better (like schema and usage of batch requests). Maybe I'll improve it soon, mayve I'll leave it for the future :) 
-
-## Transactions
-I brought this topic with quite untypical statement. Actually, what I want to explain is why this app **DOESN'T** need transactions.
-
-Well, the answer is pretty much simple: it would be overkill for nothing. In a perfect world, this app would be used by many users, each of which has their own "notebook" with tasks. So, consistency remains in a domain of one unique user unless we decide to share tasks. But this functionality is out of this assignment.
 
 # Welcome aboard!
 
