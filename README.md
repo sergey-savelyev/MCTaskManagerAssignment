@@ -1,6 +1,6 @@
 ## IN PROGRESS
 
-**Curently working on some optimizations and bringing dynamodb to a stable state: batching some requests and reconsidering the schema**
+**Curently working on reimplementation of frontend using Svelte**
 
 Stay tuned!
 
