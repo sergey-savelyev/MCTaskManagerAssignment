@@ -1,10 +1,7 @@
-## IN PROGRESS
-
-**Curently working on reimplementation of frontend using Svelte**
-
-Stay tuned!
-
 ## CHANGELOG
+
+#### 22/10/2023 Update:
+- Client reimplemented via Svelte.js
 
 #### 03/10/2023 Update:
 - Full DynamoDB support implemented. Required some optimizations though
